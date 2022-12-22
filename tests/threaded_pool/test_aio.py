@@ -1,6 +1,6 @@
 import pytest
 
-from tasktools.threaded_pool.aio import AsyncThreadedTaskPool
+from task_tools.threaded_pool.aio import AsyncThreadedTaskPool
 
 
 @pytest.mark.asyncio()

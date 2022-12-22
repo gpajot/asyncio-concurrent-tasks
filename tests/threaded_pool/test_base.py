@@ -1,17 +1,22 @@
 import asyncio
+import sys
 import time
 from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncIterator, Iterator
 
 import pytest
 
-from tasktools.threaded_pool.base import BaseThreadedTaskPool
+from task_tools.threaded_pool.base import BaseThreadedTaskPool
 
 
 @contextmanager
 def pool_cm(pool: BaseThreadedTaskPool) -> Iterator[BaseThreadedTaskPool]:
     pool.start()
-    pool.post_start().result()
+    try:
+        pool.post_start().result()
+    except Exception:
+        pool.stop()
+        raise
     try:
         yield pool
     finally:
@@ -69,6 +74,9 @@ class TestBaseThreadedTaskPool:
         assert enter_sentinel.call_count == 1
         assert exit_sentinel.call_count == 1
 
+    @pytest.mark.skipif(
+        sys.version_info < (3, 8), reason="requires python3.8 or higher for AsyncMock"
+    )
     def test_async_context_manager(self, mocker):
         enter_sentinel = mocker.AsyncMock()
         exit_sentinel = mocker.AsyncMock()
@@ -90,7 +98,8 @@ class TestBaseThreadedTaskPool:
         assert enter_sentinel.call_count == 1
         assert exit_sentinel.call_count == 1
 
-    def test_lifecycle(self, sleep):
+    @pytest.mark.asyncio()
+    async def test_lifecycle(self, sleep):
         pool = BaseThreadedTaskPool()
 
         with pytest.raises(RuntimeError, match="is not running"):
@@ -102,25 +111,31 @@ class TestBaseThreadedTaskPool:
         with pytest.raises(RuntimeError, match="is not running"):
             pool.stop()
 
+        task = sleep(0.01)
         with pytest.raises(RuntimeError, match="is not running"):
-            pool.create_task(sleep(0.01))
+            pool.create_task(task)
+        await task  # remove warnings about coroutine not awaited.
 
         with pool_cm(pool):
             with pytest.raises(RuntimeError, match="is already running"):
                 pool.start()
             assert pool.create_task(sleep(0.01)).result() == 0.01
 
+        task = sleep(0.01)
         with pytest.raises(RuntimeError, match="is not running"):
-            pool.create_task(sleep(0.01))
+            pool.create_task(task)
+        await task  # remove warnings about coroutine not awaited.
 
         with pool_cm(pool):
             assert pool.create_task(sleep(0.01)).result() == 0.01
 
+        task = sleep(0.01)
         with pytest.raises(RuntimeError, match="is not running"):
-            pool.create_task(sleep(0.01))
+            pool.create_task(task)
+        await task  # remove warnings about coroutine not awaited.
 
+    @pytest.mark.skip()
     def test_bench(self, sleep):
-        pytest.skip()
         iterations = 100
 
         loop = asyncio.new_event_loop()
