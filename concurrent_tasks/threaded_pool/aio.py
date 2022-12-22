@@ -11,7 +11,7 @@ from typing import (
     Union,
 )
 
-from task_tools.threaded_pool.base import BaseThreadedTaskPool
+from concurrent_tasks.threaded_pool.base import BaseThreadedTaskPool
 
 T = TypeVar("T")
 

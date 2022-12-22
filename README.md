@@ -1,8 +1,8 @@
-# asyncio-task-tools
+# asyncio-concurrent-tasks
 
-[![tests](https://github.com/gpajot/asyncio-task-tools/workflows/Test/badge.svg?branch=main&event=push)](https://github.com/gpajot/asyncio-task-tools/actions?query=workflow%3ATest+branch%3Amain+event%3Apush)
-[![version](https://img.shields.io/pypi/v/task_tools?label=stable)](https://pypi.org/project/task_tools/)
-[![python](https://img.shields.io/pypi/pyversions/task_tools)](https://pypi.org/project/task_tools/)
+[![tests](https://github.com/gpajot/asyncio-concurrent-tasks/workflows/Test/badge.svg?branch=main&event=push)](https://github.com/gpajot/asyncio-concurrent-tasks/actions?query=workflow%3ATest+branch%3Amain+event%3Apush)
+[![version](https://img.shields.io/pypi/v/concurrent_tasks?label=stable)](https://pypi.org/project/concurrent_tasks/)
+[![python](https://img.shields.io/pypi/pyversions/concurrent_tasks)](https://pypi.org/project/concurrent_tasks/)
 
 Tooling to run asyncio tasks.
 
@@ -15,7 +15,7 @@ Example usage:
 ```python
 import asyncio
 from typing import Callable, Awaitable
-from task_tools import BackgroundTask
+from concurrent_tasks import BackgroundTask
 
 
 class HeartBeat(BackgroundTask):
@@ -49,7 +49,7 @@ This can be used to run async functions in a dedicated event loop, while keeping
 Example usage:
 
 ```python
-from task_tools import BlockingThreadedTaskPool
+from concurrent_tasks import BlockingThreadedTaskPool
 
 
 async def func():
@@ -70,7 +70,7 @@ This is especially useful in case you cannot know if called code will properly c
 Example usage:
 
 ```python
-from task_tools import AsyncThreadedTaskPool
+from concurrent_tasks import AsyncThreadedTaskPool
 
 
 async def func():

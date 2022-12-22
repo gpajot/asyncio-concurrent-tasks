@@ -6,7 +6,7 @@ from typing import AsyncIterator, Iterator
 
 import pytest
 
-from task_tools.threaded_pool.base import BaseThreadedTaskPool
+from concurrent_tasks.threaded_pool.base import BaseThreadedTaskPool
 
 
 @contextmanager

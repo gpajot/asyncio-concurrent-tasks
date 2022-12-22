@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from task_tools.background import BackgroundTask
+from concurrent_tasks.background import BackgroundTask
 
 
 class TestBackgroundTask:
