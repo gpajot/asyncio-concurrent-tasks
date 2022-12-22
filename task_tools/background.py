@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 from contextlib import AbstractContextManager
 from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar
@@ -9,11 +11,13 @@ P = ParamSpec("P")
 
 
 class BackgroundTask(AbstractContextManager, Generic[T]):
+    """Run an async task in the background."""
+
     def __init__(
         self,
         func: Callable[P, Coroutine[Any, Any, T]],
         *args: P.args,
-        **kwargs: P.kwargs
+        **kwargs: P.kwargs,
     ):
         self._func = func
         self._args = args

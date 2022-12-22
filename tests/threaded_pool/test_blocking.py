@@ -1,4 +1,4 @@
-from tasktools.threaded_pool.blocking import BlockingThreadedTaskPool
+from task_tools.threaded_pool.blocking import BlockingThreadedTaskPool
 
 
 def test_methods(sleep):

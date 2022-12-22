@@ -27,30 +27,7 @@ class _Task(Generic[T]):
 
 
 class BaseThreadedTaskPool:
-    """Task pool running asynchronous tasks in another dedicated thread.
-
-    `name` will be used as the thread's name.
-
-    `size` can be a positive integer to limit the number of tasks concurrently running.
-
-    `timeout` can be set to define a maximum running time for each time after which it will be cancelled.
-    Note: this excludes time spent waiting to be started (time spent in the buffer).
-
-    `context_manager` can be optional context managers that will be entered when the loop has started
-    and exited before the loop is stopped.
-
-    Usage:
-    >>> async with ThreadedTaskPool() as pool:
-    >>>     res1, res2 = asyncio.gather(
-    >>>         pool.create(some_async_func(1)),
-    >>>         pool.create(some_async_func(2)),
-    >>>     )
-    Or if the main thread is running without asyncio:
-    >>> with ThreadedTaskPool() as pool:
-    >>>     future1 = pool.create(some_async_func(1))
-    >>>     future2 = pool.create(some_async_func(2))
-    >>>     res1, res2 = future1.result(), future2.result()
-    """
+    """Task pool running asynchronous tasks in another dedicated thread."""
 
     def __init__(
         self,
@@ -98,7 +75,7 @@ class BaseThreadedTaskPool:
         if self._context_manager:
             try:
                 await self._stack.enter_async_context(self._context_manager)  # type: ignore
-            except AttributeError:
+            except (TypeError, AttributeError):
                 self._stack.enter_context(self._context_manager)  # type: ignore
         self._stack.push_async_callback(self._drain_pool)
 

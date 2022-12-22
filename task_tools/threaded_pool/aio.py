@@ -11,24 +11,13 @@ from typing import (
     Union,
 )
 
-from tasktools.threaded_pool.base import BaseThreadedTaskPool
+from task_tools.threaded_pool.base import BaseThreadedTaskPool
 
 T = TypeVar("T")
 
 
 class AsyncThreadedTaskPool(AbstractAsyncContextManager):
-    """Task pool running asynchronous tasks in another dedicated thread.
-
-    `name` will be used as the thread's name.
-
-    `size` can be a positive integer to limit the number of tasks concurrently running.
-
-    `timeout` can be set to define a maximum running time for each time after which it will be cancelled.
-    Note: this excludes time spent waiting to be started (time spent in the buffer).
-
-    `context_manager` can be optional context managers that will be entered when the loop has started
-    and exited before the loop is stopped.
-    """
+    """Task pool running asynchronous tasks in another dedicated thread."""
 
     def __init__(
         self,
@@ -55,7 +44,9 @@ class AsyncThreadedTaskPool(AbstractAsyncContextManager):
         await self.__aexit__(None, None, None)
 
     def create_task(self, coro: Awaitable[T]) -> asyncio.Future[T]:
+        """Create a task, not waiting for it to complete."""
         return asyncio.wrap_future(self._base.create_task(coro))
 
     async def run(self, coro: Awaitable[T]) -> T:
+        """Create a task and wait for completion."""
         return await self.create_task(coro)
