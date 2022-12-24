@@ -81,10 +81,9 @@ class RestartableTask(Generic[T]):
         return await self._task
 
     async def _run(self) -> T:
-        if inspect.iscoroutinefunction(self._func):
-            await self._func()
-        else:
-            self._func()
+        call = self._func()
+        if inspect.isawaitable(call):
+            await call
         try:
             return await asyncio.wait_for(
                 cast("asyncio.Future[T]", self._future), self._timeout
