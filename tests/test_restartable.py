@@ -1,6 +1,7 @@
 import asyncio
 import sys
 import types
+from functools import partial
 
 import pytest
 
@@ -62,15 +63,15 @@ class TestRestartableTask:
         sys.version_info < (3, 8), reason="requires python3.8 or higher for AsyncMock"
     )
     @pytest.mark.asyncio()
-    async def test_async_func(self, mocker):
+    async def test_partial_async_func(self, mocker):
         func = mocker.AsyncMock(spec=types.FunctionType)
-        task = RestartableTask(func, timeout=0.01)
+        task = RestartableTask(partial(func, 1), timeout=0.01)
         task.start()
         await asyncio.sleep(0)  # context switch to let the task start
         task.cancel()
         await asyncio.sleep(0)  # context switch to let the task cancel
         await asyncio.sleep(0)  # context switch to let the task cancel
-        func.assert_awaited_once()
+        func.assert_awaited_once_with(1)
 
     @pytest.mark.asyncio()
     async def test_external_cancel(self, task):
