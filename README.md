@@ -5,6 +5,9 @@
 [![python](https://img.shields.io/pypi/pyversions/concurrent_tasks)](https://pypi.org/project/concurrent_tasks/)
 
 Tooling to run asyncio tasks.
+- [Background task](#background-task)
+- [Threaded task pool](#threaded-task-pool)
+- [Restartable task](#restartable-task)
 
 ## Background task
 Task that is running in the background until cancelled.
@@ -41,7 +44,7 @@ and exited before the loop is stopped.
 
 > 💡 All tasks will be completed when the pool is stopped.
 
-> 💡Blocking and async version are the same, prefer the async version if client code is async.
+> 💡 Blocking and async version are the same, prefer the async version if client code is async.
 
 ### Blocking
 This can be used to run async functions in a dedicated event loop, while keeping it running to handle background tasks
@@ -82,4 +85,31 @@ async with AsyncThreadedTaskPool() as pool:
     result = await pool.run(func())
     # Create a task, the future will hold information about completion.
     future = pool.create_task(func())
+```
+
+## Restartable task
+Task that can be started and cancelled multiple times until it can finally be completed.
+This is useful to handle pauses and retries when handling with a connection.
+
+> 💡 Use `functools.partial` to pass parameters to the function.
+
+Example usage:
+```python
+from functools import partial
+from concurrent_tasks import RestartableTask
+
+async def send(data): ...
+
+task: RestartableTask[int] = RestartableTask(partial(send, b"\x00"), timeout=1)
+task.start()
+assert await task == 1
+
+# Running in other tasks:
+
+# On connection lost:
+task.cancel()
+# On connection resumed:
+task.start()
+# On response received:
+task.set_result(1)
 ```
