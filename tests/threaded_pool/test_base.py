@@ -98,7 +98,6 @@ class TestBaseThreadedTaskPool:
         assert enter_sentinel.call_count == 1
         assert exit_sentinel.call_count == 1
 
-    @pytest.mark.asyncio()
     async def test_lifecycle(self, sleep):
         pool = BaseThreadedTaskPool()
 

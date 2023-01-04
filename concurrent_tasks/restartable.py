@@ -81,8 +81,9 @@ class RestartableTask(Generic[T]):
         return await self._task
 
     async def _run(self) -> T:
+        # Partial isn't recognized as coroutine function in python 3.7.
         call = self._func()
-        if inspect.isawaitable(call):
+        if inspect.iscoroutine(call):
             await call
         try:
             return await asyncio.wait_for(

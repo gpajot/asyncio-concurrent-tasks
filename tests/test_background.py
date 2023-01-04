@@ -7,13 +7,11 @@ from concurrent_tasks.background import BackgroundTask
 
 
 class TestBackgroundTask:
-    @pytest.mark.asyncio()
     async def test_cancelled_error(self, sleep):
         # Simply test that cancelled error is not raised.
         with BackgroundTask(sleep, 1):
             await asyncio.sleep(0.001)
 
-    @pytest.mark.asyncio()
     async def test_cancel(self, sleep):
         task = BackgroundTask(sleep, 1)
         _task = task.create()
@@ -22,12 +20,10 @@ class TestBackgroundTask:
         with pytest.raises(asyncio.CancelledError):
             await _task
 
-    @pytest.mark.asyncio()
     async def test_output(self, sleep):
         output = await BackgroundTask(sleep, 0.01).create()
         assert output == 0.01
 
-    @pytest.mark.asyncio()
     async def test_concurrency(self, sleep):
         start = time.monotonic()
         task1 = BackgroundTask(sleep, 0.01).create()
@@ -35,7 +31,6 @@ class TestBackgroundTask:
         assert await asyncio.gather(task1, task2) == [0.01, 0.01]
         assert time.monotonic() - start < 0.02
 
-    @pytest.mark.asyncio()
     async def test_restart(self, sleep):
         task = BackgroundTask(sleep, 0.01)
         task1 = task.create()
