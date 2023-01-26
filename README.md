@@ -6,6 +6,7 @@
 
 Tooling to run asyncio tasks.
 - [Background task](#background-task)
+- [Thread safe task pool](#thread-safe-task-pool)
 - [Threaded task pool](#threaded-task-pool)
 - [Restartable task](#restartable-task)
 
