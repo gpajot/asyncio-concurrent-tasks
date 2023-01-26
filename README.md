@@ -14,7 +14,6 @@ Task that is running in the background until cancelled.
 Can be used as a context manager.
 
 Example usage:
-
 ```python
 import asyncio
 from typing import Callable, Awaitable
@@ -31,14 +30,37 @@ class HeartBeat(BackgroundTask):
             await asyncio.sleep(interval)
 ```
 
-## Threaded task pool
-Run async tasks in a dedicated thread. It will have its own event loop.
+## Thread safe task pool
+The goal is to be able to safely run tasks from other threads.
 
 Parameters:
-- `name` will be used as the thread's name.
 - `size` can be a positive integer to limit the number of tasks concurrently running.
 - `timeout` can be set to define a maximum running time for each time after which it will be cancelled.
 Note: this excludes time spent waiting to be started (time spent in the buffer).
+
+Example usage:
+```python
+from concurrent_tasks import ThreadSafeTaskPool
+
+
+async def func():
+    ...
+
+
+async with ThreadSafeTaskPool() as pool:
+    # Create and run the task.
+    result = await pool.run(func())
+    # Create a task, the `concurrent.Future` will hold information about completion.
+    future = pool.create_task(func())
+```
+
+## Threaded task pool
+Run async tasks in a dedicated thread. It will have its own event loop.
+Under the hook, `ThreadSafeTaskPool` is used.
+
+Parameters:
+- `name` will be used as the thread's name.
+- `size` and `timeout` see `ThreadSafeTaskPool`.
 - `context_manager` can be optional context managers that will be entered when the loop has started
 and exited before the loop is stopped.
 
@@ -50,7 +72,6 @@ and exited before the loop is stopped.
 This can be used to run async functions in a dedicated event loop, while keeping it running to handle background tasks
 
 Example usage:
-
 ```python
 from concurrent_tasks import BlockingThreadedTaskPool
 
@@ -62,7 +83,7 @@ async def func():
 with BlockingThreadedTaskPool() as pool:
     # Create and run the task.
     result = pool.run(func())
-    # Create a task, the future will hold information about completion.
+    # Create a task, the `concurrent.Future` will hold information about completion.
     future = pool.create_task(func())
 ```
 
@@ -71,7 +92,6 @@ Threads can be useful in cooperation with asyncio to let the OS guarantee fair r
 This is especially useful in case you cannot know if called code will properly cooperate with the event loop.
 
 Example usage:
-
 ```python
 from concurrent_tasks import AsyncThreadedTaskPool
 
@@ -83,7 +103,7 @@ async def func():
 async with AsyncThreadedTaskPool() as pool:
     # Create and run the task.
     result = await pool.run(func())
-    # Create a task, the future will hold information about completion.
+    # Create a task, the asyncio.Future will hold information about completion.
     future = pool.create_task(func())
 ```
 

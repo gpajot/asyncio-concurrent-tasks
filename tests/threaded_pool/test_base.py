@@ -133,7 +133,7 @@ class TestBaseThreadedTaskPool:
             pool.create_task(task)
         await task  # remove warnings about coroutine not awaited.
 
-    @pytest.mark.skip()
+    @pytest.mark.skip(reason="benchmark")
     def test_bench(self, sleep):
         iterations = 100
 
