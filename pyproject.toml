@@ -15,23 +15,26 @@ python = ">=3.7,<3.12"
 pytest = "^7"
 pytest-asyncio = "^0"
 pytest-mock = "^3"
-flake8 = "^5"
+ruff = "~0"
 mypy = "~0"
 black = "^22"
-isort = "^5"
 pre-commit = "^2"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.isort]
-profile = "black"
-
 [tool.mypy]
 ignore_missing_imports = true
 install_types = true
 non_interactive = true
+check_untyped_defs = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.ruff]
+select = ["A", "B", "E", "F", "I", "PT"]
+ignore = ["E501"]
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]

@@ -11,7 +11,7 @@ from concurrent_tasks.restartable import RestartableTask
 class TestRestartableTask:
     @pytest.fixture()
     def func(self, mocker):
-        return mocker.Mock()
+        return mocker.Mock(return_value=None)
 
     @pytest.fixture()
     def task(self, func):
@@ -55,7 +55,7 @@ class TestRestartableTask:
 
     async def test_partial_func(self, mocker):
         func = mocker.Mock()
-        task = RestartableTask(partial(func, 1), timeout=0.01)
+        task: RestartableTask[None] = RestartableTask(partial(func, 1), timeout=0.01)
         task.start()
         await asyncio.sleep(0)  # context switch to let the task start
         task.cancel()
@@ -70,7 +70,7 @@ class TestRestartableTask:
             nonlocal called
             called = True
 
-        task = RestartableTask(partial(func, 1), timeout=0.01)
+        task: RestartableTask[None] = RestartableTask(partial(func, 1), timeout=0.01)
         task.start()
         await asyncio.sleep(0)  # context switch to let the task start
         task.cancel()
@@ -82,7 +82,7 @@ class TestRestartableTask:
     )
     async def test_partial_async_func_mock(self, mocker):
         func = mocker.AsyncMock(spec=types.FunctionType)
-        task = RestartableTask(partial(func, 1), timeout=0.01)
+        task: RestartableTask[None] = RestartableTask(partial(func, 1), timeout=0.01)
         task.start()
         await asyncio.sleep(0)  # context switch to let the task start
         task.cancel()
