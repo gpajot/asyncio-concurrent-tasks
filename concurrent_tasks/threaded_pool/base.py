@@ -7,6 +7,7 @@ from contextlib import AsyncExitStack
 from typing import (
     AsyncContextManager,
     Awaitable,
+    Callable,
     ContextManager,
     Optional,
     TypeVar,
@@ -116,3 +117,13 @@ class BaseThreadedTaskPool:
                 f"{self.__class__.__name__}({self._name}) is not running"
             )
         return self._pool.create_task(coro)
+
+
+class ThreadedPoolContextManagerWrapper(AsyncExitStack):
+    def __init__(self, get_context_manager: Callable[[], AsyncContextManager]):
+        super().__init__()
+        self._get_cm = get_context_manager
+
+    async def __aenter__(self):
+        await self.enter_async_context(self._get_cm())
+        return self

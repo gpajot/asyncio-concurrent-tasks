@@ -69,6 +69,18 @@ and exited before the loop is stopped.
 
 > 💡 Blocking and async version are the same, prefer the async version if client code is async.
 
+### Loop initialization
+> ⚠️ Asyncio primitives need to be instantiated with the proper event loop.
+
+To achieve that, use a context manager wrapping instantiation of objects:
+```python
+from functools import partial
+
+from concurrent_tasks import ThreadedPoolContextManagerWrapper, AsyncThreadedTaskPool
+
+pool = AsyncThreadedTaskPool(context_manager=ThreadedPoolContextManagerWrapper(partial(MyObj, ...)))
+```
+
 ### Blocking
 This can be used to run async functions in a dedicated event loop, while keeping it running to handle background tasks
 
