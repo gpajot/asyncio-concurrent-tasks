@@ -12,13 +12,13 @@ include = ["concurrent_tasks/py.typed"]
 python = ">=3.7,<3.12"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^7"
-pytest-asyncio = "^0"
-pytest-mock = "^3"
-ruff = "~0"
-mypy = "~0"
-black = "^22"
-pre-commit = "^2"
+pytest = ">=7,<8"
+pytest-asyncio = ">=0,<1"
+pytest-mock = ">=3,<4"
+ruff = ">=0,<1"
+mypy = ">=1,<2"
+black = ">=23,<24"
+pre-commit = ">=2,<3"
 
 [build-system]
 requires = ["poetry-core"]
