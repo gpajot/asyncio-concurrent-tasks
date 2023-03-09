@@ -1,5 +1,4 @@
 import asyncio
-import sys
 import time
 from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncIterator, Iterator
@@ -74,9 +73,6 @@ class TestBaseThreadedTaskPool:
         assert enter_sentinel.call_count == 1
         assert exit_sentinel.call_count == 1
 
-    @pytest.mark.skipif(
-        sys.version_info < (3, 8), reason="requires python3.8 or higher for AsyncMock"
-    )
     def test_async_context_manager(self, mocker):
         enter_sentinel = mocker.AsyncMock()
         exit_sentinel = mocker.AsyncMock()

@@ -77,9 +77,6 @@ class TestRestartableTask:
         await asyncio.sleep(0)  # context switch to let the task cancel
         assert called is True
 
-    @pytest.mark.skipif(
-        sys.version_info < (3, 8), reason="requires python3.8 or higher for AsyncMock"
-    )
     async def test_partial_async_func_mock(self, mocker):
         func = mocker.AsyncMock(spec=types.FunctionType)
         task: RestartableTask[None] = RestartableTask(partial(func, 1), timeout=0.01)
