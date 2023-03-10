@@ -81,10 +81,10 @@ class RestartableTask(Generic[T]):
         return await self._task
 
     async def _run(self) -> T:
-        if inspect.iscoroutinefunction(self._func):
-            await self._func()
-        else:
-            self._func()
+        # partial called on method isn't recognized as coroutine func until 3.10.
+        call = self._func()
+        if inspect.iscoroutine(call):
+            await call
         try:
             return await asyncio.wait_for(
                 cast("asyncio.Future[T]", self._future), self._timeout

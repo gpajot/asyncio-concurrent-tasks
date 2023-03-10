@@ -77,6 +77,24 @@ class TestRestartableTask:
         await asyncio.sleep(0)  # context switch to let the task cancel
         assert called is True
 
+    async def test_partial_async_method(self):
+        called = False
+
+        class A:
+            async def func(self, arg: int):
+                assert arg == 1
+                nonlocal called
+                called = True
+
+        task: RestartableTask[None] = RestartableTask(
+            partial(A().func, 1), timeout=0.01
+        )
+        task.start()
+        await asyncio.sleep(0)  # context switch to let the task start
+        task.cancel()
+        await asyncio.sleep(0)  # context switch to let the task cancel
+        assert called is True
+
     async def test_partial_async_func_mock(self, mocker):
         func = mocker.AsyncMock(spec=types.FunctionType)
         task: RestartableTask[None] = RestartableTask(partial(func, 1), timeout=0.01)
