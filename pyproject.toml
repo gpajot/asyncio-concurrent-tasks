@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "concurrent_tasks"
-version = "1.4.0"
+version = "1.4.1"
 description = "Tools to run asyncio tasks concurrently."
 authors = ["Gabriel Pajot <gab@les-cactus.co>"]
 license = "MIT"
