@@ -28,6 +28,7 @@ class BaseThreadedTaskPool:
         size: int = 0,
         timeout: Optional[float] = None,
         context_manager: Optional[Union[ContextManager, AsyncContextManager]] = None,
+        daemon: bool = False,
     ):
         self._name = name
 
@@ -40,6 +41,7 @@ class BaseThreadedTaskPool:
         self._context_manager = context_manager
 
         self._thread: Optional[threading.Thread] = None
+        self._daemon = daemon
         # Create an event loop for that thread.
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         # Set when the event loop is running.
@@ -53,7 +55,11 @@ class BaseThreadedTaskPool:
                 f"{self.__class__.__name__}({self._name}) is already running"
             )
         self._loop = asyncio.new_event_loop()
-        self._thread = threading.Thread(name=self._name, target=self._run_thread)
+        self._thread = threading.Thread(
+            name=self._name,
+            target=self._run_thread,
+            daemon=self._daemon,
+        )
         self._thread.start()
         self._initialized.wait()
 
