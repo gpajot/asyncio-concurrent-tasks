@@ -25,8 +25,15 @@ class BlockingThreadedTaskPool(AbstractContextManager):
         size: int = 0,
         timeout: Optional[float] = None,
         context_manager: Optional[Union[ContextManager, AsyncContextManager]] = None,
+        daemon: bool = False,
     ):
-        self._base = BaseThreadedTaskPool(name, size, timeout, context_manager)
+        self._base = BaseThreadedTaskPool(
+            name,
+            size,
+            timeout,
+            context_manager,
+            daemon,
+        )
 
     def __enter__(self) -> "BlockingThreadedTaskPool":
         self._base.start()
