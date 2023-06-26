@@ -16,7 +16,7 @@ pytest = "==7.4.0"
 pytest-asyncio = "==0.21.0"
 pytest-mock = "==3.11.1"
 ruff = "==0.0.275"
-mypy = "==1.4.0"
+mypy = "==1.4.1"
 black = "==23.3.0"
 pre-commit = "==3.3.3"
 
