@@ -6,6 +6,7 @@
 
 Tooling to run asyncio tasks.
 - [Background task](#background-task)
+- [Periodic task](#periodic-task)
 - [Thread safe task pool](#thread-safe-task-pool)
 - [Threaded task pool](#threaded-task-pool)
 - [Restartable task](#restartable-task)
@@ -22,13 +23,29 @@ from concurrent_tasks import BackgroundTask
 
 
 class HeartBeat(BackgroundTask):
-    def __init__(self, interval: float, func: Callable[[], None]):
+    def __init__(self, interval: float, func: Callable[[], Awaitable]):
         super().__init__(self._run, interval, func)
 
     async def _run(self, interval: float, func: Callable[[], Awaitable]) -> None:
         while True:
             await func()
             await asyncio.sleep(interval)
+```
+
+## Periodic task
+Task that is running periodically in the background until cancelled.
+Can be used as a context manager.
+There is no guarantee that the time between calls is strictly the interval if the function takes more time than the interval to execute.
+
+Example usage:
+```python
+from typing import Callable, Awaitable
+from concurrent_tasks import PeriodicTask
+
+
+class HeartBeat(PeriodicTask):
+    def __init__(self, interval: float, func: Callable[[], Awaitable]):
+        super().__init__(interval, func)
 ```
 
 ## Thread safe task pool
