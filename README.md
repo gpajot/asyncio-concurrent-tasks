@@ -10,8 +10,10 @@ Tooling to run asyncio tasks.
 - [Thread safe task pool](#thread-safe-task-pool)
 - [Threaded task pool](#threaded-task-pool)
 - [Restartable task](#restartable-task)
+- [Loop exception handler](#loop-exception-handler)
 
 ## Background task
+
 Task that is running in the background until cancelled.
 Can be used as a context manager.
 
@@ -33,6 +35,7 @@ class HeartBeat(BackgroundTask):
 ```
 
 ## Periodic task
+
 Task that is running periodically in the background until cancelled.
 Can be used as a context manager.
 There is no guarantee that the time between calls is strictly the interval if the function takes more time than the interval to execute.
@@ -49,6 +52,7 @@ class HeartBeat(PeriodicTask):
 ```
 
 ## Thread safe task pool
+
 The goal is to be able to safely run tasks from other threads.
 
 Parameters:
@@ -73,6 +77,7 @@ async with ThreadSafeTaskPool() as pool:
 ```
 
 ## Threaded task pool
+
 Run async tasks in a dedicated thread. It will have its own event loop.
 Under the hook, `ThreadSafeTaskPool` is used.
 
@@ -87,6 +92,7 @@ and exited before the loop is stopped.
 > 💡 Blocking and async version are the same, prefer the async version if client code is async.
 
 ### Loop initialization
+
 > ⚠️ Asyncio primitives need to be instantiated with the proper event loop.
 
 To achieve that, use a context manager wrapping instantiation of objects:
@@ -99,6 +105,7 @@ pool = AsyncThreadedTaskPool(context_manager=ThreadedPoolContextManagerWrapper(p
 ```
 
 ### Blocking
+
 This can be used to run async functions in a dedicated event loop, while keeping it running to handle background tasks
 
 Example usage:
@@ -118,6 +125,7 @@ with BlockingThreadedTaskPool() as pool:
 ```
 
 ### Async
+
 Threads can be useful in cooperation with asyncio to let the OS guarantee fair resource distribution between threads.
 This is especially useful in case you cannot know if called code will properly cooperate with the event loop.
 
@@ -138,6 +146,7 @@ async with AsyncThreadedTaskPool() as pool:
 ```
 
 ## Restartable task
+
 Task that can be started and cancelled multiple times until it can finally be completed.
 This is useful to handle pauses and retries when handling with a connection.
 
@@ -162,4 +171,31 @@ task.cancel()
 task.start()
 # On response received:
 task.set_result(1)
+```
+
+## Loop exception handler
+
+Shut down process when an unhandled exception is caught or a signal is received.
+To make this a graceful stop, pass a `stop_func`.
+
+When creating multiple background tasks, exceptions raised within those will be forwarded directly to the event loop.
+In order to act on those exceptions, we need to use `loop.set_exception_handler`.
+
+> 💡 When a signal is received and the process is already shutting down, it will be force killed.
+
+Example minimalistic implementation:
+
+```python
+import asyncio
+from concurrent_tasks import LoopExceptionHandler
+
+async def run():
+    event = asyncio.Event()
+    tasks = []
+    async def _stop():
+        await asyncio.gather(*tasks)
+        event.set()
+    async with LoopExceptionHandler(_stop):
+        # Adding a bunch of tasks here...
+        await event.wait()
 ```
