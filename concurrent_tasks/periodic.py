@@ -33,5 +33,5 @@ class PeriodicTask(BackgroundTask, Generic[P]):
         while True:
             start = monotonic()
             await self._initial_func(*args, **kwargs)
-            if remaining := interval - (monotonic() - start):
+            if (remaining := interval - (monotonic() - start)) > 0:
                 await asyncio.sleep(remaining)
