@@ -14,7 +14,7 @@ class TestRestartableTask:
         return mocker.Mock(return_value=None)
 
     @pytest.fixture()
-    def task(self, func):
+    async def task(self, func):
         return RestartableTask(func, timeout=0.01)
 
     async def test_not_started(self, task):
