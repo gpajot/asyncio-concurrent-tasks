@@ -9,11 +9,11 @@ from concurrent_tasks.restartable import RestartableTask
 
 
 class TestRestartableTask:
-    @pytest.fixture()
+    @pytest.fixture
     def func(self, mocker):
         return mocker.Mock(return_value=None)
 
-    @pytest.fixture()
+    @pytest.fixture
     async def task(self, func):
         return RestartableTask(func, timeout=0.01)
 

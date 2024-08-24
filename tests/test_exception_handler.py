@@ -28,7 +28,7 @@ async def sleep(d):
     return d
 
 
-@pytest.fixture()
+@pytest.fixture
 def stop_func(mocker):
     return mocker.AsyncMock()
 
