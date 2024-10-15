@@ -9,7 +9,7 @@ repository = "https://github.com/gpajot/asyncio-concurrent-tasks"
 include = ["concurrent_tasks/py.typed"]
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9"
 typing-extensions = ">=4.10"
 
 [tool.poetry.group.test.dependencies]
