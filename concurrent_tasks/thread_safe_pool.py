@@ -79,6 +79,9 @@ class ThreadSafeTaskPool:
 
     def _start_task(self, task: _Task) -> None:
         """Create and register the task."""
+        if task.future.cancelled():
+            # The task has been cancelled while waiting in the buffer.
+            return
         _task = asyncio.create_task(
             asyncio.wait_for(task.awaitable, timeout=self._timeout),
         )
@@ -87,13 +90,21 @@ class ThreadSafeTaskPool:
             partial(self._done_callback, task.future),
         )
 
+        # Cancel the task when we cancel the future to be able to stop a task manually.
+        def _fut_done(_):
+            if not _task.done():
+                _task.cancel()
+
+        task.future.add_done_callback(_fut_done)
+
     def _done_callback(self, future: futures.Future[T], task: asyncio.Task[T]) -> None:
         """Complete the future and start more tasks if possible."""
-        exc = task.exception()
-        if exc is not None:
-            future.set_exception(exc)
-        else:
-            future.set_result(task.result())
+        if not future.cancelled():
+            exc = task.exception()
+            if exc is not None:
+                future.set_exception(exc)
+            else:
+                future.set_result(task.result())
         self._tasks.discard(task)
         self._start_tasks()
 

@@ -74,3 +74,40 @@ async def test_fire_and_forget_error(key_error):
     assert future.done()
     with pytest.raises(KeyError):
         future.result()
+
+
+async def test_cancel_immediate():
+    started = False
+    completed = False
+
+    async def _task():
+        nonlocal started, completed
+        started = True
+        await asyncio.sleep(0.1)
+        completed = True
+
+    async with ThreadSafeTaskPool() as pool:
+        future = pool.create_task(_task())
+        future.cancel()
+
+    assert not started
+    assert not completed
+
+
+async def test_cancel_later():
+    started = False
+    completed = False
+
+    async def _task():
+        nonlocal started, completed
+        started = True
+        await asyncio.sleep(0.1)
+        completed = True
+
+    async with ThreadSafeTaskPool() as pool:
+        future = pool.create_task(_task())
+        await asyncio.sleep(0.01)
+        future.cancel()
+
+    assert started
+    assert not completed
