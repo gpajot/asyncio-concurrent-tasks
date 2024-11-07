@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "concurrent_tasks"
-version = "1.7.2"
+version = "1.8.0"
 description = "Tools to run asyncio tasks concurrently."
-authors = ["Gabriel Pajot <gab@les-cactus.co>"]
+authors = ["Gabriel Pajot <gab@lescactus.eu>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/gpajot/asyncio-concurrent-tasks"
@@ -32,6 +32,7 @@ check_untyped_defs = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff.lint]
 select = ["A", "B", "E", "F", "I", "PT"]
