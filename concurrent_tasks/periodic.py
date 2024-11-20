@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from time import monotonic
 from typing import Awaitable, Callable, Generic, TypeVar

@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 import asyncio
 import threading
 from concurrent import futures
 from dataclasses import dataclass
 from functools import partial
 from typing import Awaitable, Generic, Optional, Set, TypeVar
+
+from typing_extensions import Self
 
 T = TypeVar("T")
 
@@ -38,7 +38,7 @@ class ThreadSafeTaskPool:
         self._tasks: Set[asyncio.Task] = set()
         self._stopped = True
 
-    async def __aenter__(self) -> "ThreadSafeTaskPool":
+    async def __aenter__(self) -> Self:
         self._stopped = False
         return self
 
