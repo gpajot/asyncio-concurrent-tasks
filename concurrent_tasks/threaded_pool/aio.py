@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from contextlib import AbstractAsyncContextManager
 from typing import (
@@ -10,6 +8,8 @@ from typing import (
     TypeVar,
     Union,
 )
+
+from typing_extensions import Self
 
 from concurrent_tasks.threaded_pool.base import BaseThreadedTaskPool
 
@@ -35,7 +35,7 @@ class AsyncThreadedTaskPool(AbstractAsyncContextManager):
             daemon,
         )
 
-    async def __aenter__(self) -> "AsyncThreadedTaskPool":
+    async def __aenter__(self) -> Self:
         self._base.start()
         await asyncio.wrap_future(self._base.post_start())
         return self

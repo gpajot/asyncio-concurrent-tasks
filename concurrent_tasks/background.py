@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 import asyncio
 from contextlib import AbstractContextManager
 from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar
 
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, Self
 
 T = TypeVar("T")
 P = ParamSpec("P")
@@ -24,7 +22,7 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
         self._kwargs = kwargs
         self._task: Optional[asyncio.Task[T]] = None
 
-    def __enter__(self) -> "BackgroundTask":
+    def __enter__(self) -> Self:
         self.create()
         return self
 

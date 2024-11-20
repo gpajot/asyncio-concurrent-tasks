@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from concurrent import futures
 from contextlib import AbstractContextManager
 from typing import (
@@ -10,6 +8,8 @@ from typing import (
     TypeVar,
     Union,
 )
+
+from typing_extensions import Self
 
 from concurrent_tasks.threaded_pool.base import BaseThreadedTaskPool
 
@@ -35,7 +35,7 @@ class BlockingThreadedTaskPool(AbstractContextManager):
             daemon,
         )
 
-    def __enter__(self) -> "BlockingThreadedTaskPool":
+    def __enter__(self) -> Self:
         self._base.start()
         self._base.post_start().result()
         return self
