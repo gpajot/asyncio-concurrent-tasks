@@ -1,7 +1,7 @@
 # asyncio-concurrent-tasks
 
 [![tests](https://github.com/gpajot/asyncio-concurrent-tasks/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/gpajot/asyncio-concurrent-tasks/actions/workflows/test.yml?query=branch%3Amain+event%3Apush)
-[![version](https://img.shields.io/pypi/v/concurrent_tasks?label=stable)](https://pypi.org/project/concurrent_tasks/)
+[![PyPi](https://img.shields.io/pypi/v/concurrent_tasks?label=stable)](https://pypi.org/project/concurrent_tasks/)
 [![python](https://img.shields.io/pypi/pyversions/concurrent_tasks)](https://pypi.org/project/concurrent_tasks/)
 
 Tooling to run asyncio tasks.
@@ -87,13 +87,16 @@ Parameters:
 - `context_manager` can be optional context managers that will be entered when the loop has started
 and exited before the loop is stopped.
 
-> 💡 All tasks will be completed when the pool is stopped.
+> [!NOTE]
+> All tasks will be completed when the pool is stopped.
 
-> 💡 Blocking and async version are the same, prefer the async version if client code is async.
+> [!TIP]
+> Blocking and async version are the same, prefer the async version if client code is async.
 
 ### Loop initialization
 
-> ⚠️ Asyncio primitives need to be instantiated with the proper event loop.
+> [!WARNING]
+> Asyncio primitives need to be instantiated with the proper event loop.
 
 To achieve that, use a context manager wrapping instantiation of objects:
 ```python
@@ -150,7 +153,8 @@ async with AsyncThreadedTaskPool() as pool:
 Task that can be started and cancelled multiple times until it can finally be completed.
 This is useful to handle pauses and retries when handling with a connection.
 
-> 💡 Use `functools.partial` to pass parameters to the function.
+> [!TIP]
+> Use `functools.partial` to pass parameters to the function.
 
 Example usage:
 ```python
@@ -181,7 +185,8 @@ To make this a graceful stop, pass a `stop_func`.
 When creating multiple background tasks, exceptions raised within those will be forwarded directly to the event loop.
 In order to act on those exceptions, we need to use `loop.set_exception_handler`.
 
-> 💡 When a signal is received and the process is already shutting down, it will be force killed.
+> [!IMPORTANT]
+> When a signal is received and the process is already shutting down, it will be force killed.
 
 Example minimalistic implementation:
 
