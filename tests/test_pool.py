@@ -1,15 +1,13 @@
 import asyncio
-import contextlib
-import threading
 import time
 
 import pytest
 
-from concurrent_tasks.thread_safe_pool import ThreadSafeTaskPool
+from concurrent_tasks.pool import TaskPool
 
 
 async def test_concurrency(sleep):
-    async with ThreadSafeTaskPool() as pool:
+    async with TaskPool() as pool:
         start = time.monotonic()
         assert await asyncio.gather(
             pool.run(sleep(0.01)),
@@ -19,7 +17,7 @@ async def test_concurrency(sleep):
 
 
 async def test_size(sleep):
-    async with ThreadSafeTaskPool(size=1) as pool:
+    async with TaskPool(size=1) as pool:
         start = time.monotonic()
         assert await asyncio.gather(
             pool.run(sleep(0.01)),
@@ -29,7 +27,7 @@ async def test_size(sleep):
 
 
 async def test_timeout(sleep):
-    async with ThreadSafeTaskPool(timeout=0.015) as pool:
+    async with TaskPool(timeout=0.015) as pool:
         start = time.monotonic()
         res1, res2 = await asyncio.gather(
             pool.run(sleep(0.01)),
@@ -41,27 +39,8 @@ async def test_timeout(sleep):
         assert isinstance(res2, asyncio.TimeoutError)  # type: ignore[has-type]
 
 
-async def test_thread(sleep):
-    event = threading.Event()
-    async with ThreadSafeTaskPool(timeout=0.015) as pool:
-
-        def _run():
-            future = pool.create_task(sleep(0.01))
-            event.set()
-            assert future.result(0.015) == 0.01
-
-        thread = threading.Thread(target=_run)
-        thread.start()
-        # Wait until the task was created.
-        event.wait(0.01)
-
-    thread.join(0.02)
-
-    assert event.is_set()
-
-
 async def test_fire_and_forget(sleep):
-    async with ThreadSafeTaskPool() as pool:
+    async with TaskPool() as pool:
         future = pool.create_task(sleep(0.01))
 
     assert future.done()
@@ -69,7 +48,7 @@ async def test_fire_and_forget(sleep):
 
 
 async def test_fire_and_forget_error(key_error):
-    async with ThreadSafeTaskPool() as pool:
+    async with TaskPool() as pool:
         future = pool.create_task(key_error)
 
     assert future.done()
@@ -87,15 +66,12 @@ async def test_cancel_immediate():
         await asyncio.sleep(0.1)
         completed = True
 
-    task = _task()
-    async with ThreadSafeTaskPool() as pool:
-        future = pool.create_task(task)
+    async with TaskPool() as pool:
+        future = pool.create_task(_task())
         future.cancel()
 
-    assert not started
+    assert started
     assert not completed
-    with contextlib.suppress(asyncio.CancelledError):
-        await task
 
 
 async def test_cancel_later():
@@ -108,7 +84,7 @@ async def test_cancel_later():
         await asyncio.sleep(0.1)
         completed = True
 
-    async with ThreadSafeTaskPool() as pool:
+    async with TaskPool() as pool:
         future = pool.create_task(_task())
         await asyncio.sleep(0.01)
         future.cancel()
