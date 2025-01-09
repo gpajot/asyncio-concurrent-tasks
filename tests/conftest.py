@@ -13,7 +13,7 @@ def sleep() -> Callable[[float], Coroutine[Any, Any, float]]:
     return _sleep
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def key_error():
     async def _error() -> None:
         raise KeyError()

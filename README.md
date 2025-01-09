@@ -8,6 +8,7 @@ Tooling to run asyncio tasks.
 - [Background task](#background-task)
 - [Periodic task](#periodic-task)
 - [Thread safe task pool](#thread-safe-task-pool)
+- [Task pool](#task-pool)
 - [Threaded task pool](#threaded-task-pool)
 - [Restartable task](#restartable-task)
 - [Loop exception handler](#loop-exception-handler)
@@ -72,9 +73,15 @@ async def func():
 async with ThreadSafeTaskPool() as pool:
     # Create and run the task.
     result = await pool.run(func())
-    # Create a task, the `concurrent.Future` will hold information about completion.
+    # Create a task, the `concurrent.futures.Future` will hold information about completion.
     future = pool.create_task(func())
 ```
+
+## Task pool
+
+See `ThreadSafeTaskPool`, the interface is the same except:
+- it is not thread safe
+- `asyncio.Future` is used instead of `concurrent.futures.Future`
 
 ## Threaded task pool
 
