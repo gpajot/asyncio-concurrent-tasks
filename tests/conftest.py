@@ -1,11 +1,12 @@
 import asyncio
-from typing import Any, Callable, Coroutine
+from typing import Awaitable, Callable
 
 import pytest
+from typing_extensions import Never
 
 
 @pytest.fixture(scope="session")
-def sleep() -> Callable[[float], Coroutine[Any, Any, float]]:
+def sleep() -> Callable[[float], Awaitable[float]]:
     async def _sleep(duration: float) -> float:
         await asyncio.sleep(duration)
         return duration
@@ -13,9 +14,9 @@ def sleep() -> Callable[[float], Coroutine[Any, Any, float]]:
     return _sleep
 
 
-@pytest.fixture
-def key_error():
-    async def _error() -> None:
+@pytest.fixture(scope="session")
+def key_error() -> Callable[[], Awaitable[Never]]:
+    async def _error() -> Never:
         raise KeyError()
 
-    return _error()
+    return _error
