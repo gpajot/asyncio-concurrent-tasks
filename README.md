@@ -12,6 +12,7 @@ Tooling to run asyncio tasks.
 - [Threaded task pool](#threaded-task-pool)
 - [Restartable task](#restartable-task)
 - [Loop exception handler](#loop-exception-handler)
+- [Debouncer](#debouncer)
 
 ## Background task
 
@@ -211,3 +212,11 @@ async def run():
         # Adding a bunch of tasks here...
         await event.wait()
 ```
+
+## Debouncer
+
+Can be used either through the class `Debouncer` (which can be gracefully ended through its `__aexit__` method) or with the decorator `debounce`.
+
+- `eager` calls the function immediately unless debounced. Debounced calls will return the last result.
+- `lazy` will call the function at the end of the debounce duration, with the last parameters. All calls will block until the period is over.
+- when both options are used, the first call will return immediately, and subsequent debounced calls will block until the end.

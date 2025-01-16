@@ -70,7 +70,7 @@ async def test_fire_and_forget(sleep):
 
 async def test_fire_and_forget_error(key_error):
     async with ThreadSafeTaskPool() as pool:
-        future = pool.create_task(key_error)
+        future = pool.create_task(key_error())
 
     assert future.done()
     with pytest.raises(KeyError):
