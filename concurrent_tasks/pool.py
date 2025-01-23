@@ -1,4 +1,6 @@
 import asyncio
+import sys
+from contextvars import Context
 from dataclasses import dataclass
 from functools import partial
 from typing import Awaitable, Generic, Optional, Set, TypeVar
@@ -12,6 +14,7 @@ T = TypeVar("T")
 class _Task(Generic[T]):
     awaitable: Awaitable[T]
     future: asyncio.Future[T]
+    context: Optional[Context]
 
 
 class TaskPool:
@@ -41,12 +44,16 @@ class TaskPool:
     async def stop(self):
         await self.__aexit__(None, None, None)
 
-    def create_task(self, coro: Awaitable[T]) -> asyncio.Future[T]:
+    def create_task(
+        self,
+        coro: Awaitable[T],
+        context: Optional[Context] = None,
+    ) -> asyncio.Future[T]:
         """Create a new task in the pool. Response will be received through the future."""
         future: asyncio.Future[T] = asyncio.Future()
         if self._stopped:
             raise RuntimeError(f"{self.__class__.__name__} is not running")
-        self._buffer.put_nowait(_Task(coro, future))
+        self._buffer.put_nowait(_Task(coro, future, context))
         self._start_tasks()
         return future
 
@@ -69,9 +76,12 @@ class TaskPool:
         if task.future.cancelled():
             # The task has been cancelled while waiting in the buffer.
             return
-        _task = asyncio.create_task(
-            asyncio.wait_for(task.awaitable, timeout=self._timeout),
-        )
+        coro = asyncio.wait_for(task.awaitable, timeout=self._timeout)
+        if sys.version_info >= (3, 11):
+            _task = asyncio.create_task(coro, context=task.context)
+        else:
+            _task = asyncio.create_task(coro)
+
         self._tasks.add(_task)
         _task.add_done_callback(
             partial(self._done_callback, task.future),
