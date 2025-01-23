@@ -1,5 +1,7 @@
 import asyncio
 import inspect
+import sys
+from contextvars import Context
 from typing import Any, Callable, Generic, Optional, TypeVar, cast
 
 T = TypeVar("T")
@@ -26,7 +28,7 @@ class RestartableTask(Generic[T]):
     def __await__(self):
         return self._wait().__await__()
 
-    def start(self) -> None:
+    def start(self, context: Optional[Context] = None) -> None:
         """Start one attempt of the task."""
         if self._task and not self._task.cancelled():
             raise RuntimeError(
@@ -34,7 +36,11 @@ class RestartableTask(Generic[T]):
             )
         self._cancelled = False
         self._future = asyncio.Future()
-        self._task = asyncio.create_task(self._run())
+        coro = self._run()
+        if sys.version_info >= (3, 11):
+            self._task = asyncio.create_task(coro, context=context)
+        else:
+            self._task = asyncio.create_task(coro)
 
     def cancel(self) -> None:
         """Cancel the current task if started."""
