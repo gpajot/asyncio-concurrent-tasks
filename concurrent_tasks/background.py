@@ -47,10 +47,11 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
             self._task.cancel()
             self._task = None
 
-    def _done_callback(self, task: asyncio.Task[T]) -> None:
+    def _done_callback(self, task: asyncio.Task[T]) -> Optional[T]:
         """When a task is referenced, exception will be silenced
         Call result to raise the potential exception.
         """
         self._task = None
         if not task.cancelled():
-            task.result()
+            return task.result()
+        return None
