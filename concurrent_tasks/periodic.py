@@ -55,7 +55,7 @@ async def _run_periodic(
             await asyncio.sleep(remaining)
 
 
-class OnTimePeriodicTask(BackgroundTask[None], Generic[P]):
+class OnTimePeriodicTask(BackgroundTask[None]):
     """Compared to `PeriodicTask`, this runs consistently on a specific time.
     When DST switch occurs, when `timedelta(days=x)` or above is used, time will remain the same.
 
