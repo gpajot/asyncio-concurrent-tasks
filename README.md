@@ -7,6 +7,7 @@
 Tooling to run asyncio tasks.
 - [Background task](#background-task)
 - [Periodic task](#periodic-task)
+- [On time periodic task](#on-time-periodic-task)
 - [Thread safe task pool](#thread-safe-task-pool)
 - [Task pool](#task-pool)
 - [Threaded task pool](#threaded-task-pool)
@@ -52,6 +53,19 @@ class HeartBeat(PeriodicTask):
     def __init__(self, interval: float, func: Callable[[], Awaitable]):
         super().__init__(interval, func)
 ```
+
+## On time periodic task
+
+Compared to `PeriodicTask`, this runs consistently on a specific time.
+When DST switch occurs, intervals greater or equal to 1 day will be run at the same time in the timezone,
+intervals of less than a day will be run at a consistent interval.
+It can be used either without an interval to un on a specific time, or regularly.
+
+> [!TIP]
+> Use `functools.partial` to pass arguments if necessary.
+
+> [!NOTE]
+>  If `ignore_overdue` is set to `True`, if the function execution time makes us miss the next run, it will be ignored.
 
 ## Thread safe task pool
 
