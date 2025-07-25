@@ -9,7 +9,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import Self
+from typing_extensions import Self  # 3.11
 
 from concurrent_tasks.threaded_pool.base import BaseThreadedTaskPool
 

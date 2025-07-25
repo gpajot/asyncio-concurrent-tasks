@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Awaitable, Generic, Optional, Set, TypeVar
 
-from typing_extensions import Self
+from typing_extensions import Self  # 3.11
 
 T = TypeVar("T")
 

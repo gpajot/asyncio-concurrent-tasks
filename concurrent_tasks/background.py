@@ -4,7 +4,7 @@ from contextlib import AbstractContextManager
 from contextvars import Context
 from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar
 
-from typing_extensions import ParamSpec, Self
+from typing_extensions import ParamSpec, Self  # 3.10, 3.11
 
 T = TypeVar("T")
 P = ParamSpec("P")

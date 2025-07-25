@@ -2,7 +2,7 @@ import asyncio
 from typing import Awaitable, Callable
 
 import pytest
-from typing_extensions import Never
+from typing_extensions import Never  # 3.11
 
 
 @pytest.fixture(scope="session")
