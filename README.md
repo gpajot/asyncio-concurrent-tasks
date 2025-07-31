@@ -14,6 +14,7 @@ Tooling to run asyncio tasks.
 - [Restartable task](#restartable-task)
 - [Loop exception handler](#loop-exception-handler)
 - [Debouncer](#debouncer)
+- [Robust protocol](#robust-protocol)
 
 ## Background task
 
@@ -234,3 +235,28 @@ Can be used either through the class `Debouncer` (which can be gracefully ended 
 - `eager` calls the function immediately unless debounced. Debounced calls will return the last result.
 - `lazy` will call the function at the end of the debounce duration, with the last parameters. All calls will block until the period is over.
 - when both options are used, the first call will return immediately, and subsequent debounced calls will block until the end.
+
+
+## Robust protocol
+
+Automatically reconnects unless closed purposefully. To be used with asyncio connections and transports.
+
+> [!WARNING]
+> When reading data, reconnections will be transparent, so it's up to the consumer to handle incomplete data.
+
+```python
+import asyncio
+from functools import partial
+from concurrent_tasks import RobustStream
+
+
+async def run():
+    async with RobustStream(partial(
+        asyncio.get_running_loop().create_connection,
+        address="127.0.0.1",
+        port=8000,
+    )) as protocol:
+        await protocol.write(b"...")
+        reader = protocol.reader
+        data = await reader.readline()
+```

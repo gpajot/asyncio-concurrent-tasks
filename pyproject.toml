@@ -29,6 +29,7 @@ pre-commit = "==4.2.0"
 check_untyped_defs = true
 ignore_missing_imports = true
 install_types = true
+no_implicit_reexport = true
 non_interactive = true
 warn_redundant_casts = true
 warn_unused_ignores = true
@@ -41,7 +42,6 @@ asyncio_default_fixture_loop_scope = "function"
 select = ["A", "B", "E", "F", "I", "PT"]
 ignore = ["E501"]
 per-file-ignores = { "__init__.py" = ["F401"] }
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
