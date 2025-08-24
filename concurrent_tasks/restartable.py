@@ -22,47 +22,40 @@ class RestartableTask(Generic[T]):
         self._func = func
         self._task: Optional[asyncio.Task[T]] = None
         self._future: Optional[asyncio.Future[T]] = None
-        self._done = asyncio.Event()
-        self._cancelled = False
+        self._started = asyncio.Event()
 
     def __await__(self):
         return self._wait().__await__()
 
     def start(self, context: Optional[Context] = None) -> None:
         """Start one attempt of the task."""
-        if self._task and not self._task.cancelled():
-            raise RuntimeError(
-                f"restartable task for func {self._func} is already running"
-            )
-        self._cancelled = False
+        if self._task:
+            return
         self._future = asyncio.Future()
-        coro = self._run()
+        self._started.set()
         if sys.version_info >= (3, 11):
-            self._task = asyncio.create_task(coro, context=context)
+            self._task = asyncio.create_task(self._run(), context=context)
         else:
-            self._task = asyncio.create_task(coro)
+            self._task = asyncio.create_task(self._run())
 
     def cancel(self) -> None:
         """Cancel the current task if started."""
-        if self._task:
-            self._cancelled = True
-            self._task.cancel()
+        if not self._task:
+            return
+        self._task.cancel()
+        self._task = None
+        self._started.clear()
+        self._future = None
 
     def set_result(self, result: T) -> None:
         """Complete the task with the result."""
-        if not self._future:
-            raise RuntimeError(
-                f"restartable task for func {self._func} has not been started"
-            )
-        self._future.set_result(result)
+        if self._future:
+            self._future.set_result(result)
 
     def set_exception(self, exception: BaseException) -> None:
         """Complete the task by raising an exception."""
-        if not self._future:
-            raise RuntimeError(
-                f"restartable task for func {self._func} has not been started"
-            )
-        self._future.set_exception(exception)
+        if self._future:
+            self._future.set_exception(exception)
 
     async def _wait(self) -> T:
         """Wait for the full task to complete."""
@@ -72,26 +65,22 @@ class RestartableTask(Generic[T]):
             )
         # Keep waiting until the task has completed without being manually cancelled.
         while True:
-            self._done.clear()
+            await self._started.wait()
+            assert self._task
             try:
-                await self._done.wait()
-            finally:
-                # Manually cancel the task if this is externally cancelled.
-                if not self._task.done():
-                    self._task.cancel()
-            if not self._cancelled:
-                # The task has completed.
-                break
-        return await self._task
+                return await self._task
+            except asyncio.CancelledError:
+                # The task was cancelled.
+                if not self._started.is_set():
+                    continue
+                raise
 
     async def _run(self) -> T:
         # partial called on method isn't recognized as coroutine func until 3.10.
         call = self._func()
         if inspect.iscoroutine(call):
             await call
-        try:
-            return await asyncio.wait_for(
-                cast("asyncio.Future[T]", self._future), self._timeout
-            )
-        finally:
-            self._done.set()
+        return await asyncio.wait_for(
+            cast("asyncio.Future[T]", self._future),
+            self._timeout,
+        )
