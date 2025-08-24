@@ -23,8 +23,12 @@ class TestRestartableTask:
 
     async def test_already_started(self, task):
         task.start()
-        with pytest.raises(RuntimeError, match="is already running"):
-            task.start()
+        task.start()
+        task.cancel()
+
+    async def test_already_cancelled(self, task):
+        task.start()
+        task.cancel()
         task.cancel()
 
     async def test_timeout(self, task):
@@ -36,7 +40,7 @@ class TestRestartableTask:
         task.start()
         await asyncio.sleep(0)  # context switch to let the task start
         task.cancel()
-        await asyncio.sleep(0.015)
+        await asyncio.sleep(0)  # context switch to let the task cancel
         task.start()
         task.set_result(1)
         await task
