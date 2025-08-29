@@ -13,7 +13,7 @@ else:
 from time import monotonic
 from typing import Callable, Coroutine, Generic, Optional, TypeVar
 
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec  # 3.10
 
 from concurrent_tasks.background import BackgroundTask
 

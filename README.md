@@ -236,6 +236,8 @@ Can be used either through the class `Debouncer` (which can be gracefully ended 
 - `lazy` will call the function at the end of the debounce duration, with the last parameters. All calls will block until the period is over.
 - when both options are used, the first call will return immediately, and subsequent debounced calls will block until the end.
 
+If the output of the debounced function isn't important, `AsyncDebouncer` can be used.
+
 
 ## Robust protocol
 

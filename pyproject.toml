@@ -1,6 +1,6 @@
 [project]
 name = "concurrent_tasks"
-version = "1.14.0"
+version = "1.15.0"
 description = "Tools to run asyncio tasks concurrently."
 license = { text = "MIT" }
 readme = "README.md"
