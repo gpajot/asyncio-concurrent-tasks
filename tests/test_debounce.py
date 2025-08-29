@@ -1,9 +1,10 @@
 import asyncio
 import time
+from unittest.mock import call
 
 import pytest
 
-from concurrent_tasks.debounce import debounce
+from concurrent_tasks.debounce import AsyncDebouncer, debounce
 
 
 async def test_debounce_exception(key_error):
@@ -26,7 +27,7 @@ async def test_debounce_eager_fire_immediately(func):
     start = time.monotonic()
     assert await debounced(1) == 1
     assert time.monotonic() - start < 0.01
-    _assert_func_calls(func, 1)
+    assert func.call_args_list == [call(1)]
 
 
 async def test_debounce_eager_debounced(func):
@@ -36,7 +37,7 @@ async def test_debounce_eager_debounced(func):
     start = time.monotonic()
     assert await asyncio.gather(task1, task2) == [1, 1]
     assert time.monotonic() - start < 0.01
-    _assert_func_calls(func, 1)
+    assert func.call_args_list == [call(1)]
 
 
 async def test_debounce_eager_subsequent(func):
@@ -44,7 +45,7 @@ async def test_debounce_eager_subsequent(func):
     assert await debounced(1) == 1
     await asyncio.sleep(0.01)
     assert await debounced(2) == 2
-    _assert_func_calls(func, 1, 2)
+    assert func.call_args_list == [call(1), call(2)]
 
 
 async def test_debounce_lazy_use_last_params(func):
@@ -54,7 +55,7 @@ async def test_debounce_lazy_use_last_params(func):
     start = time.monotonic()
     assert await asyncio.gather(task1, task2) == [2, 2]
     assert time.monotonic() - start >= 0.01
-    _assert_func_calls(func, 2)
+    assert func.call_args_list == [call(2)]
 
 
 async def test_debounce_lazy_subsequent(func):
@@ -62,7 +63,7 @@ async def test_debounce_lazy_subsequent(func):
     assert await debounced(1) == 1
     await asyncio.sleep(0.01)
     assert await debounced(2) == 2
-    _assert_func_calls(func, 1, 2)
+    assert func.call_args_list == [call(1), call(2)]
 
 
 async def test_debounce_full(func):
@@ -73,8 +74,14 @@ async def test_debounce_full(func):
     start = time.monotonic()
     assert await asyncio.gather(task1, task2, task3) == [1, 3, 3]
     assert time.monotonic() - start >= 0.01
-    _assert_func_calls(func, 1, 3)
+    assert func.call_args_list == [call(1), call(3)]
 
 
-def _assert_func_calls(func, *args):
-    func.assert_has_calls(tuple(((i,), {}) for i in args))
+async def test_async(func):
+    async with AsyncDebouncer(func, 0.01) as debounced:
+        assert await debounced(1) is False
+        assert await debounced(2) is True
+        assert await debounced(3) is True
+        await asyncio.sleep(0.025)
+        assert await debounced(4) is False
+    assert func.call_args_list == [call(1), call(3), call(4)]
