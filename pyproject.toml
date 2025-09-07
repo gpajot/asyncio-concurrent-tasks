@@ -2,7 +2,7 @@
 name = "concurrent_tasks"
 version = "1.15.0"
 description = "Tools to run asyncio tasks concurrently."
-license = { text = "MIT" }
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
@@ -12,24 +12,22 @@ urls = { repository = "https://github.com/gpajot/asyncio-concurrent-tasks" }
 dependencies = [
     "typing-extensions >=4.10",
 ]
+license-files = ["LICENSE"]
 
-[tool.poetry]
-include = ["concurrent_tasks/py.typed"]
-requires-poetry = ">=2"
-
-[tool.poetry.group.test.dependencies]
-pytest = "==8.4.2"
-pytest-asyncio = "==1.1.0"
-pytest-mock = "==3.14.1"
-ruff = "==0.12.12"
-mypy = "==1.17.1"
-pre-commit = "==4.3.0"
+[dependency-groups]
+dev = [
+    "pytest ==8.4.2",
+    "pytest-asyncio ==1.1.0",
+    "pytest-mock ==3.14.1",
+    "ruff ==0.12.12",
+    "mypy ==1.17.1",
+    "pre-commit ==4.3.0",
+]
 
 [tool.mypy]
 check_untyped_defs = true
 ignore_missing_imports = true
 install_types = true
-no_implicit_reexport = true
 non_interactive = true
 warn_redundant_casts = true
 warn_unused_ignores = true
@@ -42,6 +40,10 @@ asyncio_default_fixture_loop_scope = "function"
 select = ["A", "B", "E", "F", "I", "PT"]
 ignore = ["E501"]
 per-file-ignores = { "__init__.py" = ["F401"] }
+
+[tool.uv]
+build-backend = { module-name = "concurrent_tasks", module-root = "" }
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.8.15,<0.9"]
+build-backend = "uv_build"
