@@ -1,5 +1,4 @@
 import asyncio
-from asyncio import IncompleteReadError
 from unittest.mock import call
 
 import pytest
@@ -80,12 +79,8 @@ async def test_read(protocol):
         reader = protocol.reader
         asyncio.get_running_loop().call_soon(protocol.data_received, b"bz")
         while True:
-            if len(received_data) < 2:
-                received_data.append(await reader.readuntil(b"z"))
-            else:
-                with pytest.raises(IncompleteReadError) as exc_info:
-                    received_data.append(await reader.readuntil(b"z"))
-                assert exc_info.value.partial == b"e"
+            received_data.append(await reader.readuntil(b"z"))
+            if len(received_data) >= 2:
                 break
             if len(received_data) == 1:
                 protocol.data_received(b"c")

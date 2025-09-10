@@ -28,6 +28,17 @@ class RobustStreamReader(asyncio.StreamReader):
         else:
             await super()._wait_for_data(func_name)  # type: ignore[misc]
 
+    async def readuntil(self, separator=b"\n"):
+        while True:
+            try:
+                return await super().readuntil(separator)
+            except asyncio.IncompleteReadError as e:
+                # If transport disconnected, ignore the error.
+                if self._transport:
+                    raise
+                elif e.partial:
+                    logger.warning("connection closed before finishing reading: %r", e)
+
 
 class RobustStream(asyncio.Protocol):
     """Robust stream around asyncio connections.
@@ -77,7 +88,10 @@ class RobustStream(asyncio.Protocol):
                     self._name,
                 )
         if reader := self._reader():
+            # Reader should have been cleared in `connection_lost`,
+            # but in case it finished because of a timeout, make sure.
             reader.feed_eof()
+            reader.clear_transport()
             self._reader_wr = None
         for waiter in self._write_waiters:
             if not waiter.done():
@@ -127,6 +141,7 @@ class RobustStream(asyncio.Protocol):
             logger.info("%s: disconnected", self._name)
             if reader := self._reader():
                 reader.feed_eof()
+                reader.clear_transport()
             # Notify the transport was properly closed.
             self._closed.set()
         else:
