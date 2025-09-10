@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import weakref
 from collections import deque
 from typing import Awaitable, Callable, Optional
 
@@ -52,7 +53,7 @@ class RobustStream(asyncio.Protocol):
         self._connect_task = BackgroundTask(self._connect)
 
         self._transport: Optional[asyncio.Transport] = None
-        self._reader: Optional[RobustStreamReader] = None
+        self._reader_wr: Optional[weakref.ReferenceType[RobustStreamReader]] = None
         self._writing_paused = False
         self._write_waiters: deque[asyncio.Future[None]] = deque()
 
@@ -75,15 +76,20 @@ class RobustStream(asyncio.Protocol):
                     "%s: timeout waiting for transport to close",
                     self._name,
                 )
-        if self._reader:
-            self._reader.feed_eof()
-            self._reader = None
+        if reader := self._reader():
+            reader.feed_eof()
+            self._reader_wr = None
         for waiter in self._write_waiters:
             if not waiter.done():
                 if exc_val:
                     waiter.set_exception(exc_val)
                 else:
                     waiter.set_result(None)
+
+    def _reader(self) -> Optional[RobustStreamReader]:
+        if self._reader_wr:
+            return self._reader_wr()
+        return None
 
     async def _connect(self) -> None:
         self._last_exc = None
@@ -103,8 +109,8 @@ class RobustStream(asyncio.Protocol):
     def connection_made(self, transport: asyncio.Transport) -> None:  # type: ignore[override]
         self._connect_task.cancel()
         self._transport = transport
-        if self._reader:
-            self._reader.set_transport(transport)
+        if reader := self._reader():
+            reader.set_transport(transport)
         self._connected.set()
         for waiter in self._write_waiters:
             if not waiter.done():
@@ -119,33 +125,34 @@ class RobustStream(asyncio.Protocol):
         self._connect_task.cancel()
         if not exc:
             logger.info("%s: disconnected", self._name)
-            if self._reader:
-                self._reader.feed_eof()
+            if reader := self._reader():
+                reader.feed_eof()
             # Notify the transport was properly closed.
             self._closed.set()
         else:
             logger.warning("%s: connection lost: %s, reconnecting...", self._name, exc)
             # Attempt to reconnect.
-            if self._reader:
-                self._reader.clear_transport()
+            if reader := self._reader():
+                reader.clear_transport()
             self._connect_task.create()
 
     def data_received(self, data: bytes) -> None:
-        if self._reader:
-            self._reader.feed_data(data)
+        if reader := self._reader():
+            reader.feed_data(data)
 
     @property
     def reader(self) -> asyncio.StreamReader:
-        if self._reader:
+        if self._reader():
             raise RuntimeError(f"{self._name} already has a reader")
         if self._closed.is_set():
             raise RuntimeError(f"{self._name} is closed")
         if self._closing:
             raise RuntimeError(f"{self._name} is closing")
-        self._reader = RobustStreamReader(self._connected.wait)
+        reader = RobustStreamReader(self._connected.wait)
+        self._reader_wr = weakref.ref(reader)
         if self._transport:
-            self._reader.set_transport(self._transport)
-        return self._reader
+            reader.set_transport(self._transport)
+        return reader
 
     def pause_writing(self) -> None:
         self._writing_paused = True
