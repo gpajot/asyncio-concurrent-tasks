@@ -25,9 +25,9 @@ class TaskPool:
         size: int = 0,
         timeout: Optional[float] = None,
     ):
-        self._size = size
-        self._timeout = timeout
-        # Buffer tasks if a max size is set.
+        self.size = size
+        self.timeout = timeout
+
         self._buffer: asyncio.Queue[_Task] = asyncio.Queue()
         # Currently running tasks.
         self._tasks: Set[asyncio.Task] = set()
@@ -62,7 +62,7 @@ class TaskPool:
 
     def _start_tasks(self) -> None:
         """Start more tasks if the buffer isn't empty and size permits."""
-        while not self._size or len(self._tasks) < self._size:
+        while not self.size or len(self._tasks) < self.size:
             task: Optional[_Task] = None
             if not self._buffer.empty():
                 task = self._buffer.get_nowait()
@@ -76,7 +76,7 @@ class TaskPool:
         if task.future.cancelled():
             # The task has been cancelled while waiting in the buffer.
             return
-        coro = asyncio.wait_for(task.awaitable, timeout=self._timeout)
+        coro = asyncio.wait_for(task.awaitable, timeout=self.timeout)
         if sys.version_info >= (3, 11):
             _task = asyncio.create_task(coro, context=task.context)
         else:
