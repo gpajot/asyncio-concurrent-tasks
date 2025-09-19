@@ -2,7 +2,7 @@ import asyncio
 import inspect
 import sys
 from contextvars import Context
-from typing import Any, Callable, Generic, Optional, TypeVar, cast
+from typing import Any, Callable, Generator, Generic, Optional, TypeVar, cast
 
 T = TypeVar("T")
 
@@ -24,7 +24,7 @@ class RestartableTask(Generic[T]):
         self._future: Optional[asyncio.Future[T]] = None
         self._started = asyncio.Event()
 
-    def __await__(self):
+    def __await__(self) -> Generator[Any, None, T]:
         return self._wait().__await__()
 
     def start(self, context: Optional[Context] = None) -> None:

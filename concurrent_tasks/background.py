@@ -2,7 +2,7 @@ import asyncio
 import sys
 from contextlib import AbstractContextManager
 from contextvars import Context
-from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar
+from typing import Any, Callable, Coroutine, Generator, Generic, Optional, TypeVar
 
 from typing_extensions import ParamSpec, Self  # 3.10, 3.11
 
@@ -31,6 +31,11 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.cancel()
 
+    def __await__(self) -> Generator[Any, None, Optional[T]]:
+        if self._task:
+            return self._task.__await__()
+        return _empty_gen()
+
     def create(self, context: Optional[Context] = None) -> asyncio.Task[T]:
         if self._task:
             self._task.cancel()
@@ -55,3 +60,7 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
         if not task.cancelled():
             return task.result()
         return None
+
+
+def _empty_gen() -> Generator[Any, None, None]:
+    yield

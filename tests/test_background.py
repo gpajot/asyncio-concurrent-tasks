@@ -39,3 +39,10 @@ class TestBackgroundTask:
         assert await task2 == 0.01
         with pytest.raises(asyncio.CancelledError):
             await task1
+
+    async def test_await(self, sleep):
+        task = BackgroundTask(sleep, 0.01)
+        task.create()
+        assert await task == 0.01
+        # Should not fail when not started but return nothing.
+        assert await task is None
