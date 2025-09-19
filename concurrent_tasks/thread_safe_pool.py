@@ -24,8 +24,8 @@ class ThreadSafeTaskPool:
         size: int = 0,
         timeout: Optional[float] = None,
     ):
-        self._size = size
-        self._timeout = timeout
+        self.size = size
+        self.timeout = timeout
 
         # Keep a reference to this thread's loop to be able to start tasks from other loops.
         self._loop = asyncio.get_event_loop()
@@ -65,7 +65,7 @@ class ThreadSafeTaskPool:
 
     def _start_tasks(self) -> None:
         """Start more tasks if the buffer isn't empty and size permits."""
-        while not self._size or len(self._tasks) < self._size:
+        while not self.size or len(self._tasks) < self.size:
             task: Optional[_Task] = None
             with self._rlock:
                 # Check the size to avoid waiting while locking.
@@ -83,7 +83,7 @@ class ThreadSafeTaskPool:
             # The task has been cancelled while waiting in the buffer.
             return
         _task = asyncio.create_task(
-            asyncio.wait_for(task.awaitable, timeout=self._timeout),
+            asyncio.wait_for(task.awaitable, timeout=self.timeout),
         )
         self._tasks.add(_task)
         _task.add_done_callback(
