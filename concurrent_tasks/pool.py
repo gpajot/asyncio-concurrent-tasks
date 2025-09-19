@@ -25,9 +25,10 @@ class TaskPool:
         size: int = 0,
         timeout: Optional[float] = None,
     ):
-        self.size = size
+        self._size = size
         self.timeout = timeout
 
+        # Buffer tasks if a max size is set.
         self._buffer: asyncio.Queue[_Task] = asyncio.Queue()
         # Currently running tasks.
         self._tasks: Set[asyncio.Task] = set()
@@ -44,6 +45,17 @@ class TaskPool:
     async def stop(self):
         await self.__aexit__(None, None, None)
 
+    @property
+    def size(self) -> int:
+        return self._size
+
+    @size.setter
+    def size(self, size: int) -> None:
+        old = self._size
+        self._size = size
+        if size > old or not size and old:
+            self._start_tasks()
+
     def create_task(
         self,
         coro: Awaitable[T],
@@ -53,8 +65,12 @@ class TaskPool:
         future: asyncio.Future[T] = asyncio.Future()
         if self._stopped:
             raise RuntimeError(f"{self.__class__.__name__} is not running")
-        self._buffer.put_nowait(_Task(coro, future, context))
-        self._start_tasks()
+        task = _Task(coro, future, context)
+        if self._size:
+            self._buffer.put_nowait(task)
+            self._start_tasks()
+        else:
+            self._start_task(task)
         return future
 
     async def run(self, coro: Awaitable[T]) -> T:
@@ -62,14 +78,10 @@ class TaskPool:
 
     def _start_tasks(self) -> None:
         """Start more tasks if the buffer isn't empty and size permits."""
-        while not self.size or len(self._tasks) < self.size:
-            task: Optional[_Task] = None
-            if not self._buffer.empty():
-                task = self._buffer.get_nowait()
-            if task:
-                self._start_task(task)
-            else:
-                break
+        while (
+            not self._buffer.empty() and not self._size or len(self._tasks) < self._size
+        ):
+            self._start_task(self._buffer.get_nowait())
 
     def _start_task(self, task: _Task) -> None:
         """Create and register the task."""

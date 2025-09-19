@@ -24,7 +24,7 @@ class ThreadSafeTaskPool:
         size: int = 0,
         timeout: Optional[float] = None,
     ):
-        self.size = size
+        self._size = size
         self.timeout = timeout
 
         # Keep a reference to this thread's loop to be able to start tasks from other loops.
@@ -50,6 +50,16 @@ class ThreadSafeTaskPool:
     async def stop(self):
         await self.__aexit__(None, None, None)
 
+    @property
+    def size(self) -> int:
+        return self._size
+
+    @size.setter
+    def size(self, size: int) -> None:
+        if size > self._size or not size and self._size:
+            self._loop.call_soon_threadsafe(self._start_tasks)
+        self._size = size
+
     def create_task(self, coro: Awaitable[T]) -> futures.Future[T]:
         """Create a new task in the pool. Response will be received through the future."""
         future: futures.Future[T] = futures.Future()
@@ -65,7 +75,7 @@ class ThreadSafeTaskPool:
 
     def _start_tasks(self) -> None:
         """Start more tasks if the buffer isn't empty and size permits."""
-        while not self.size or len(self._tasks) < self.size:
+        while not self._size or len(self._tasks) < self._size:
             task: Optional[_Task] = None
             with self._rlock:
                 # Check the size to avoid waiting while locking.
