@@ -78,8 +78,8 @@ class TaskPool:
 
     def _start_tasks(self) -> None:
         """Start more tasks if the buffer isn't empty and size permits."""
-        while (
-            not self._buffer.empty() and not self._size or len(self._tasks) < self._size
+        while not self._buffer.empty() and (
+            not self._size or len(self._tasks) < self._size
         ):
             self._start_task(self._buffer.get_nowait())
 
