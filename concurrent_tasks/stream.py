@@ -25,8 +25,7 @@ class RobustStreamReader(asyncio.StreamReader):
         if not self._transport:
             await self._connected_waiter()
             assert self._transport
-        else:
-            await super()._wait_for_data(func_name)  # type: ignore[misc]
+        await super()._wait_for_data(func_name)  # type: ignore[misc]
 
     async def readuntil(self, separator=b"\n"):
         while True:
