@@ -120,7 +120,6 @@ class RobustStream(asyncio.Protocol):
                 )
 
     def connection_made(self, transport: asyncio.Transport) -> None:  # type: ignore[override]
-        self._connect_task.cancel()
         self._transport = transport
         if reader := self._reader():
             reader.set_transport(transport)
