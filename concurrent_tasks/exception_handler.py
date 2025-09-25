@@ -31,7 +31,7 @@ class LoopExceptionHandler:
 
     """
 
-    def __init__(self, stop_func: Optional[Callable[[], Coroutine]]):
+    def __init__(self, stop_func: Optional[Callable[[], Coroutine]] = None):
         self._stop_func = stop_func
         self._shutdown_task: Optional[asyncio.Task] = None
         self._exception_caught: Optional[Exception] = None
