@@ -127,7 +127,7 @@ class RobustStream(asyncio.Protocol):
         for waiter in self._write_waiters:
             if not waiter.done():
                 waiter.set_result(None)
-        logger.info("%s: connected", self._name)
+        logger.debug("%s: connected", self._name)
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
         # Store errors to allow subclasses to handle them in `_connect` as this function is not async.
@@ -136,7 +136,7 @@ class RobustStream(asyncio.Protocol):
         self._transport = None
         self._connect_task.cancel()
         if not exc:
-            logger.info("%s: disconnected", self._name)
+            logger.debug("%s: disconnected", self._name)
             if reader := self._reader():
                 reader.feed_eof()
                 reader.clear_transport()
