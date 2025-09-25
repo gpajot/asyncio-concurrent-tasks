@@ -65,6 +65,15 @@ async def test_reconnect(protocol, transport, connector):
     assert transport.write.call_args_list == [call(b"a"), call(b"b")]
 
 
+async def test_reconnect_without_exception(protocol, transport, connector):
+    async with protocol:
+        await protocol.write(b"a")
+        protocol.connection_lost(None)
+        await protocol.write(b"b")
+    assert connector.call_count == 2
+    assert transport.write.call_args_list == [call(b"a"), call(b"b")]
+
+
 async def test_reader_not_connected(protocol):
     with pytest.raises(RuntimeError, match="is closed"):
         _ = protocol.reader

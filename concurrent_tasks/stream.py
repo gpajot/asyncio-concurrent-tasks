@@ -25,7 +25,8 @@ class RobustStreamReader(asyncio.StreamReader):
         if not self._transport:
             await self._connected_waiter()
             assert self._transport
-        await super()._wait_for_data(func_name)  # type: ignore[misc]
+        else:
+            await super()._wait_for_data(func_name)  # type: ignore[misc]
 
     async def readuntil(self, separator=b"\n"):
         while True:
@@ -135,7 +136,7 @@ class RobustStream(asyncio.Protocol):
         self._connected.clear()
         self._transport = None
         self._connect_task.cancel()
-        if not exc:
+        if self._closing:
             logger.debug("%s: disconnected", self._name)
             if reader := self._reader():
                 reader.feed_eof()
@@ -143,7 +144,11 @@ class RobustStream(asyncio.Protocol):
             # Notify the transport was properly closed.
             self._closed.set()
         else:
-            logger.warning("%s: connection lost: %s, reconnecting...", self._name, exc)
+            logger.warning(
+                "%s: connection lost: %s, reconnecting...",
+                self._name,
+                exc or "(no exception)",
+            )
             # Attempt to reconnect.
             if reader := self._reader():
                 reader.clear_transport()
