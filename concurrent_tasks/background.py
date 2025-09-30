@@ -56,7 +56,8 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
         """When a task is referenced, exception will be silenced
         Call result to raise the potential exception.
         """
-        self._task = None
+        if self._task is task:
+            self._task = None
         if not task.cancelled():
             return task.result()
         return None
