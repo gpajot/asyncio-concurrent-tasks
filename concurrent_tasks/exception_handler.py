@@ -3,7 +3,8 @@ import functools
 import logging
 import os
 import signal
-from typing import Any, Callable, Coroutine, Dict, Optional, cast
+from collections.abc import Callable, Coroutine
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +32,10 @@ class LoopExceptionHandler:
 
     """
 
-    def __init__(self, stop_func: Optional[Callable[[], Coroutine]] = None):
+    def __init__(self, stop_func: Callable[[], Coroutine] | None = None):
         self._stop_func = stop_func
-        self._shutdown_task: Optional[asyncio.Task] = None
-        self._exception_caught: Optional[Exception] = None
+        self._shutdown_task: asyncio.Task | None = None
+        self._exception_caught: Exception | None = None
 
     async def __aenter__(self) -> None:
         loop = asyncio.get_running_loop()
@@ -74,10 +75,10 @@ class LoopExceptionHandler:
     def _handle_exception(
         self,
         loop: asyncio.AbstractEventLoop,
-        context: Dict[str, Any],
+        context: dict[str, Any],
     ):
         """Shutdown when an unhandled exception is caught."""
-        exc: Optional[Exception]
+        exc: Exception | None
         try:
             # Try to get a traceback.
             if (future := context.get("future")) and isinstance(future, asyncio.Future):

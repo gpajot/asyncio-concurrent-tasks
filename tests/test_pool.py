@@ -35,8 +35,8 @@ async def test_timeout(sleep):
             return_exceptions=True,
         )
         assert time.monotonic() - start < 0.02
-        assert res1 == 0.01  # type: ignore[has-type]
-        assert isinstance(res2, asyncio.TimeoutError)  # type: ignore[has-type]
+        assert res1 == 0.01
+        assert isinstance(res2, asyncio.TimeoutError)
 
 
 async def test_fire_and_forget(sleep):

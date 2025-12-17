@@ -10,8 +10,9 @@ if sys.version_info < (3, 11):
     UTC = timezone.utc
 else:
     from datetime import UTC
+from collections.abc import Callable, Coroutine
 from time import monotonic
-from typing import Callable, Coroutine, Generic, Optional, TypeVar
+from typing import Generic, TypeVar
 
 from typing_extensions import ParamSpec  # 3.10
 
@@ -70,7 +71,7 @@ class OnTimePeriodicTask(BackgroundTask[None]):
         func: Callable[[], Coroutine],
         on: datetime,
         *,
-        interval: Optional[timedelta] = None,
+        interval: timedelta | None = None,
         ignore_overdue: bool = True,
     ):
         if not on.tzinfo:
@@ -89,7 +90,7 @@ async def _sleep(delay: float, ignore_overdue: bool) -> bool:
 def _get_next_run_time(
     now: datetime,
     dt: datetime,
-    interval: Optional[timedelta] = None,
+    interval: timedelta | None = None,
 ) -> tuple[datetime, float]:
     if not interval:
         # Compare in UTC to ensure proper sleep time event with DST.
@@ -106,7 +107,7 @@ def _get_next_run_time(
 async def _run_on_time(
     func: Callable[[], Coroutine],
     on: datetime,
-    interval: Optional[timedelta],
+    interval: timedelta | None,
     ignore_overdue: bool,
 ) -> None:
     if not interval:

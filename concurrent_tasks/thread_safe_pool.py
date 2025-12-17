@@ -1,9 +1,10 @@
 import asyncio
 import threading
+from collections.abc import Awaitable
 from concurrent import futures
 from dataclasses import dataclass
 from functools import partial
-from typing import Awaitable, Generic, Optional, Set, TypeVar
+from typing import Generic, TypeVar
 
 from typing_extensions import Self  # 3.11
 
@@ -22,7 +23,7 @@ class ThreadSafeTaskPool:
     def __init__(
         self,
         size: int = 0,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ):
         self._size = size
         self.timeout = timeout
@@ -35,7 +36,7 @@ class ThreadSafeTaskPool:
         # Reentrant lock to lock buffer and event access between threads.
         self._rlock = threading.RLock()
         # Currently running tasks.
-        self._tasks: Set[asyncio.Task] = set()
+        self._tasks: set[asyncio.Task] = set()
         self._stopped = True
 
     async def __aenter__(self) -> Self:
@@ -56,7 +57,7 @@ class ThreadSafeTaskPool:
 
     @size.setter
     def size(self, size: int) -> None:
-        if size > self._size or not size and self._size:
+        if size > self._size or (not size and self._size):
             self._loop.call_soon_threadsafe(self._start_tasks)
         self._size = size
 
@@ -76,7 +77,7 @@ class ThreadSafeTaskPool:
     def _start_tasks(self) -> None:
         """Start more tasks if the buffer isn't empty and size permits."""
         while not self._size or len(self._tasks) < self._size:
-            task: Optional[_Task] = None
+            task: _Task | None = None
             with self._rlock:
                 # Check the size to avoid waiting while locking.
                 if not self._buffer.empty():

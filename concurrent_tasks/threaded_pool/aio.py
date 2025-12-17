@@ -1,12 +1,8 @@
 import asyncio
-from contextlib import AbstractAsyncContextManager
+from collections.abc import Awaitable
+from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from typing import (
-    AsyncContextManager,
-    Awaitable,
-    ContextManager,
-    Optional,
     TypeVar,
-    Union,
 )
 
 from typing_extensions import Self  # 3.11
@@ -21,10 +17,12 @@ class AsyncThreadedTaskPool(AbstractAsyncContextManager):
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: str | None = None,
         size: int = 0,
-        timeout: Optional[float] = None,
-        context_manager: Optional[Union[ContextManager, AsyncContextManager]] = None,
+        timeout: float | None = None,
+        context_manager: AbstractContextManager
+        | AbstractAsyncContextManager
+        | None = None,
         daemon: bool = False,
     ):
         self._base = BaseThreadedTaskPool(

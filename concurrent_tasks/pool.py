@@ -1,9 +1,10 @@
 import asyncio
 import sys
+from collections.abc import Awaitable
 from contextvars import Context
 from dataclasses import dataclass
 from functools import partial
-from typing import Awaitable, Generic, Optional, Set, TypeVar
+from typing import Generic, TypeVar
 
 from typing_extensions import Self  # 3.11
 
@@ -14,7 +15,7 @@ T = TypeVar("T")
 class _Task(Generic[T]):
     awaitable: Awaitable[T]
     future: asyncio.Future[T]
-    context: Optional[Context]
+    context: Context | None
 
 
 class TaskPool:
@@ -23,7 +24,7 @@ class TaskPool:
     def __init__(
         self,
         size: int = 0,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ):
         self._size = size
         self.timeout = timeout
@@ -31,7 +32,7 @@ class TaskPool:
         # Buffer tasks if a max size is set.
         self._buffer: asyncio.Queue[_Task] = asyncio.Queue()
         # Currently running tasks.
-        self._tasks: Set[asyncio.Task] = set()
+        self._tasks: set[asyncio.Task] = set()
         self._stopped = True
 
     async def __aenter__(self) -> Self:
@@ -53,13 +54,13 @@ class TaskPool:
     def size(self, size: int) -> None:
         old = self._size
         self._size = size
-        if size > old or not size and old:
+        if size > old or (not size and old):
             self._start_tasks()
 
     def create_task(
         self,
         coro: Awaitable[T],
-        context: Optional[Context] = None,
+        context: Context | None = None,
     ) -> asyncio.Future[T]:
         """Create a new task in the pool. Response will be received through the future."""
         future: asyncio.Future[T] = asyncio.Future()

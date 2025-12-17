@@ -1,6 +1,5 @@
 import asyncio
 import signal
-from typing import List
 
 import pytest
 
@@ -14,7 +13,7 @@ async def run(stop_func, *coros, raise_exc=None, raise_sig=None, results=None):
             async def _raise():
                 raise raise_exc
 
-            asyncio.create_task(_raise())
+            asyncio.create_task(_raise())  # noqa: RUF006
         if raise_sig:
             signal.raise_signal(raise_sig)
         res = await asyncio.gather(*[asyncio.create_task(coro) for coro in coros])
@@ -43,7 +42,7 @@ def test_normal(stop_func):
 
 def test_exception(stop_func):
     exc = ValueError("!")
-    results: List[float] = []
+    results: list[float] = []
     with pytest.raises(ValueError, match="!"):
         asyncio.run(
             run(stop_func, sleep(0.01), raise_exc=exc, results=results),

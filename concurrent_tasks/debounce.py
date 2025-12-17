@@ -3,8 +3,9 @@ import contextlib
 import functools
 import sys
 import time
+from collections.abc import Callable, Coroutine
 from contextvars import Context
-from typing import Any, Callable, Coroutine, Generic, Optional, TypeVar, cast
+from typing import Any, Generic, TypeVar, cast
 
 from typing_extensions import ParamSpec  # 3.10
 
@@ -29,8 +30,8 @@ class Debouncer(contextlib.AbstractAsyncContextManager, Generic[P, T]):
         self._lazy = lazy
 
         self._lock = asyncio.Lock()
-        self._last_call: Optional[float] = None
-        self._future: Optional[asyncio.Future[T]] = None
+        self._last_call: float | None = None
+        self._future: asyncio.Future[T] | None = None
         self._next_params: tuple[tuple[Any, ...], dict[str, Any]] = ((), {})
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -98,8 +99,8 @@ class AsyncDebouncer(contextlib.AbstractAsyncContextManager, Generic[P]):
         self._duration = duration
 
         self._lock = asyncio.Lock()
-        self._last_call: Optional[float] = None
-        self._task: Optional[asyncio.Task] = None
+        self._last_call: float | None = None
+        self._task: asyncio.Task | None = None
         self._next_params: tuple[tuple[Any, ...], dict[str, Any]] = ((), {})
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -128,7 +129,7 @@ class AsyncDebouncer(contextlib.AbstractAsyncContextManager, Generic[P]):
 
     async def _call_with_context(
         self,
-        context: Optional[Context],
+        context: Context | None,
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> bool:

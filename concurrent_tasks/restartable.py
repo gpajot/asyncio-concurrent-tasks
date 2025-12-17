@@ -1,8 +1,9 @@
 import asyncio
 import inspect
 import sys
+from collections.abc import Callable, Generator
 from contextvars import Context
-from typing import Any, Callable, Generator, Generic, Optional, TypeVar, cast
+from typing import Any, Generic, TypeVar, cast
 
 T = TypeVar("T")
 
@@ -16,18 +17,18 @@ class RestartableTask(Generic[T]):
     def __init__(
         self,
         func: Callable[[], Any],
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ):
         self._timeout = timeout
         self._func = func
-        self._task: Optional[asyncio.Task[T]] = None
-        self._future: Optional[asyncio.Future[T]] = None
+        self._task: asyncio.Task[T] | None = None
+        self._future: asyncio.Future[T] | None = None
         self._started = asyncio.Event()
 
     def __await__(self) -> Generator[Any, None, T]:
         return self._wait().__await__()
 
-    def start(self, context: Optional[Context] = None) -> None:
+    def start(self, context: Context | None = None) -> None:
         """Start one attempt of the task."""
         if self._task:
             return
