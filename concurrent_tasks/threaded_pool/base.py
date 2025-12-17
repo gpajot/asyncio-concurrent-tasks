@@ -1,15 +1,14 @@
 import asyncio
 import threading
+from collections.abc import Awaitable, Callable
 from concurrent import futures
-from contextlib import AsyncExitStack
+from contextlib import (
+    AbstractAsyncContextManager,
+    AbstractContextManager,
+    AsyncExitStack,
+)
 from typing import (
-    AsyncContextManager,
-    Awaitable,
-    Callable,
-    ContextManager,
-    Optional,
     TypeVar,
-    Union,
 )
 
 from concurrent_tasks.thread_safe_pool import ThreadSafeTaskPool
@@ -22,26 +21,28 @@ class BaseThreadedTaskPool:
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: str | None = None,
         size: int = 0,
-        timeout: Optional[float] = None,
-        context_manager: Optional[Union[ContextManager, AsyncContextManager]] = None,
+        timeout: float | None = None,
+        context_manager: AbstractContextManager
+        | AbstractAsyncContextManager
+        | None = None,
         daemon: bool = False,
     ):
         self._name = name
 
         self._size = size
         self._timeout = timeout
-        self._pool: Optional[ThreadSafeTaskPool] = None
+        self._pool: ThreadSafeTaskPool | None = None
 
         # Context managers.
         self._stack = AsyncExitStack()
         self._context_manager = context_manager
 
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
         self._daemon = daemon
         # Create an event loop for that thread.
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._loop: asyncio.AbstractEventLoop | None = None
         # Set when the event loop is running.
         # Cleared when stopping to prevent receiving new tasks.
         self._initialized = threading.Event()
@@ -65,9 +66,9 @@ class BaseThreadedTaskPool:
         """Enter context managers in this tread's event loop."""
         if self._context_manager:
             try:
-                await self._stack.enter_async_context(self._context_manager)  # type: ignore
+                await self._stack.enter_async_context(self._context_manager)  # ty: ignore[invalid-argument-type]
             except (TypeError, AttributeError):
-                self._stack.enter_context(self._context_manager)  # type: ignore
+                self._stack.enter_context(self._context_manager)  # ty: ignore[invalid-argument-type]
         # Create the pool in the right event loop.
         self._pool = ThreadSafeTaskPool(size=self._size, timeout=self._timeout)
         await self._stack.enter_async_context(self._pool)
@@ -124,7 +125,7 @@ class BaseThreadedTaskPool:
 
 
 class ThreadedPoolContextManagerWrapper(AsyncExitStack):
-    def __init__(self, get_context_manager: Callable[[], AsyncContextManager]):
+    def __init__(self, get_context_manager: Callable[[], AbstractAsyncContextManager]):
         super().__init__()
         self._get_cm = get_context_manager
 

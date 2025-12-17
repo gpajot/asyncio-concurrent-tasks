@@ -1,5 +1,4 @@
 import asyncio
-import sys
 import types
 from functools import partial
 
@@ -112,6 +111,5 @@ class TestRestartableTask:
         task.start()
         with pytest.raises(asyncio.TimeoutError):
             await asyncio.wait_for(task, 0.001)
-        if sys.version_info >= (3, 8):
-            with pytest.raises(asyncio.CancelledError):
-                await task
+        with pytest.raises(asyncio.CancelledError):
+            await task

@@ -1,7 +1,7 @@
 import asyncio
 import time
+from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager, contextmanager
-from typing import AsyncIterator, Iterator
 
 import pytest
 

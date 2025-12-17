@@ -2,7 +2,8 @@ import asyncio
 import logging
 import weakref
 from collections import deque
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
+from typing import cast
 
 from concurrent_tasks.background import BackgroundTask
 
@@ -13,7 +14,7 @@ class RobustStreamReader(asyncio.StreamReader):
     def __init__(self, connected_waiter: Callable[[], Awaitable]):
         super().__init__()
         self._connected_waiter = connected_waiter
-        self._transport: Optional[asyncio.BaseTransport] = None
+        self._transport: asyncio.BaseTransport | None = None
 
     def set_transport(self, transport: asyncio.BaseTransport) -> None:
         self._transport = transport
@@ -26,7 +27,7 @@ class RobustStreamReader(asyncio.StreamReader):
             await self._connected_waiter()
             assert self._transport
         else:
-            await super()._wait_for_data(func_name)  # type: ignore[misc]
+            await super()._wait_for_data(func_name)  # ty: ignore[unresolved-attribute]
 
     async def readuntil(self, separator=b"\n"):
         while True:
@@ -48,8 +49,8 @@ class RobustStream(asyncio.Protocol):
         self,
         connector: Callable[[Callable[[], asyncio.Protocol]], Awaitable],
         name: str = "",
-        backoff: Optional[Callable[[], Awaitable]] = None,
-        timeout: Optional[float] = None,
+        backoff: Callable[[], Awaitable] | None = None,
+        timeout: float | None = None,
     ):
         self._connector = connector
         self._name = name or self.__class__.__name__
@@ -59,12 +60,12 @@ class RobustStream(asyncio.Protocol):
         self._closing = False
         self._closed = asyncio.Event()
         self._closed.set()
-        self._last_exc: Optional[Exception] = None
+        self._last_exc: Exception | None = None
         self._connected = asyncio.Event()
         self._connect_task = BackgroundTask(self._connect)
 
-        self._transport: Optional[asyncio.Transport] = None
-        self._reader_wr: Optional[weakref.ReferenceType[RobustStreamReader]] = None
+        self._transport: asyncio.Transport | None = None
+        self._reader_wr: weakref.ReferenceType[RobustStreamReader] | None = None
         self._writing_paused = False
         self._write_waiters: deque[asyncio.Future[None]] = deque()
 
@@ -100,7 +101,7 @@ class RobustStream(asyncio.Protocol):
                 else:
                     waiter.set_result(None)
 
-    def _reader(self) -> Optional[RobustStreamReader]:
+    def _reader(self) -> RobustStreamReader | None:
         if self._reader_wr:
             return self._reader_wr()
         return None
@@ -120,8 +121,8 @@ class RobustStream(asyncio.Protocol):
                     exc_info=True,
                 )
 
-    def connection_made(self, transport: asyncio.Transport) -> None:  # type: ignore[override]
-        self._transport = transport
+    def connection_made(self, transport: asyncio.BaseTransport) -> None:
+        self._transport = cast(asyncio.Transport, transport)
         if reader := self._reader():
             reader.set_transport(transport)
         self._connected.set()
@@ -130,7 +131,7 @@ class RobustStream(asyncio.Protocol):
                 waiter.set_result(None)
         logger.debug("%s: connected", self._name)
 
-    def connection_lost(self, exc: Optional[Exception]) -> None:
+    def connection_lost(self, exc: Exception | None) -> None:
         # Store errors to allow subclasses to handle them in `_connect` as this function is not async.
         self._last_exc = exc
         self._connected.clear()

@@ -1,8 +1,9 @@
 import asyncio
 import sys
+from collections.abc import Callable, Coroutine, Generator
 from contextlib import AbstractContextManager
 from contextvars import Context
-from typing import Any, Callable, Coroutine, Generator, Generic, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 from typing_extensions import ParamSpec, Self  # 3.10, 3.11
 
@@ -22,7 +23,7 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
         self._func = func
         self._args = args
         self._kwargs = kwargs
-        self._task: Optional[asyncio.Task[T]] = None
+        self._task: asyncio.Task[T] | None = None
 
     def __enter__(self) -> Self:
         self.create()
@@ -31,12 +32,12 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.cancel()
 
-    def __await__(self) -> Generator[Any, None, Optional[T]]:
+    def __await__(self) -> Generator[Any, None, T | None]:
         if self._task:
             return self._task.__await__()
         return _empty_gen()
 
-    def create(self, context: Optional[Context] = None) -> asyncio.Task[T]:
+    def create(self, context: Context | None = None) -> asyncio.Task[T]:
         if self._task:
             self._task.cancel()
         coro = self._func(*self._args, **self._kwargs)
@@ -52,7 +53,7 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
             self._task.cancel()
             self._task = None
 
-    def _done_callback(self, task: asyncio.Task[T]) -> Optional[T]:
+    def _done_callback(self, task: asyncio.Task[T]) -> T | None:
         """When a task is referenced, exception will be silenced
         Call result to raise the potential exception.
         """
