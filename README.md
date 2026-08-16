@@ -82,8 +82,7 @@ Example usage:
 from concurrent_tasks import ThreadSafeTaskPool
 
 
-async def func():
-    ...
+async def func(): ...
 
 
 async with ThreadSafeTaskPool() as pool:
@@ -127,7 +126,9 @@ from functools import partial
 
 from concurrent_tasks import ThreadedPoolContextManagerWrapper, AsyncThreadedTaskPool
 
-pool = AsyncThreadedTaskPool(context_manager=ThreadedPoolContextManagerWrapper(partial(MyObj, ...)))
+pool = AsyncThreadedTaskPool(
+    context_manager=ThreadedPoolContextManagerWrapper(partial(MyObj, ...))
+)
 ```
 
 ### Blocking
@@ -139,8 +140,7 @@ Example usage:
 from concurrent_tasks import BlockingThreadedTaskPool
 
 
-async def func():
-    ...
+async def func(): ...
 
 
 with BlockingThreadedTaskPool() as pool:
@@ -160,8 +160,7 @@ Example usage:
 from concurrent_tasks import AsyncThreadedTaskPool
 
 
-async def func():
-    ...
+async def func(): ...
 
 
 async with AsyncThreadedTaskPool() as pool:
@@ -184,7 +183,9 @@ Example usage:
 from functools import partial
 from concurrent_tasks import RestartableTask
 
+
 async def send(data): ...
+
 
 task: RestartableTask[int] = RestartableTask(partial(send, b"\x00"), timeout=1)
 task.start()
@@ -217,12 +218,15 @@ Example minimalistic implementation:
 import asyncio
 from concurrent_tasks import LoopExceptionHandler
 
+
 async def run():
     event = asyncio.Event()
     tasks = []
+
     async def _stop():
         await asyncio.gather(*tasks)
         event.set()
+
     async with LoopExceptionHandler(_stop):
         # Adding a bunch of tasks here...
         await event.wait()
@@ -253,11 +257,13 @@ from concurrent_tasks import RobustStream
 
 
 async def run():
-    async with RobustStream(partial(
-        asyncio.get_running_loop().create_connection,
-        address="127.0.0.1",
-        port=8000,
-    )) as protocol:
+    async with RobustStream(
+        partial(
+            asyncio.get_running_loop().create_connection,
+            address="127.0.0.1",
+            port=8000,
+        )
+    ) as protocol:
         await protocol.write(b"...")
         reader = protocol.reader
         data = await reader.readline()
