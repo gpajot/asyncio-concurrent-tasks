@@ -19,9 +19,9 @@ dev = [
     "pytest==9.1.1",
     "pytest-asyncio==1.4.0",
     "pytest-mock ==3.15.1",
-    "ruff==0.15.22",
-    "pre-commit==4.6.1",
-    "ty==0.0.64",
+    "ruff==0.16.3",
+    "pre-commit==4.6.2",
+    "ty==0.0.72",
 ]
 
 [tool.pytest.ini_options]
