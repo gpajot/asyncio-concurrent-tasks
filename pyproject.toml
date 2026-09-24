@@ -21,7 +21,7 @@ dev = [
     "pytest-mock ==3.15.1",
     "ruff==0.16.8",
     "pre-commit==4.6.2",
-    "ty==0.0.80",
+    "ty==0.0.82",
 ]
 
 [tool.pytest.ini_options]
