@@ -12,13 +12,12 @@ else:
     from datetime import UTC
 from collections.abc import Callable, Coroutine
 from time import monotonic
-from typing import Generic, TypeVar
+from typing import Generic
 
 from typing_extensions import ParamSpec  # 3.10
 
 from concurrent_tasks.background import BackgroundTask
 
-T = TypeVar("T")
 P = ParamSpec("P")
 
 
@@ -37,9 +36,9 @@ class PeriodicTask(BackgroundTask[None], Generic[P]):
         **kwargs: P.kwargs,
     ):
         super().__init__(
-            functools.partial(_run_periodic, interval, func),
-            *args,
-            **kwargs,
+            functools.partial(_run_periodic, interval, func),  # ty: ignore[invalid-argument-type]
+            *args,  # ty: ignore[invalid-argument-type]
+            **kwargs,  # ty: ignore[invalid-argument-type]
         )
 
 
