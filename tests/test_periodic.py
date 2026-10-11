@@ -1,14 +1,6 @@
 import asyncio
-import sys
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-
-if sys.version_info < (3, 11):
-    from datetime import timezone
-
-    UTC = timezone.utc
-else:
-    from datetime import UTC
+from datetime import UTC, datetime, timedelta
 from functools import partial
 from zoneinfo import ZoneInfo
 

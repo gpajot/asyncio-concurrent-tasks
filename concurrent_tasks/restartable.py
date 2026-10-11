@@ -1,6 +1,5 @@
 import asyncio
 import inspect
-import sys
 from collections.abc import Callable, Generator
 from contextvars import Context
 from typing import Any, Generic, TypeVar, cast
@@ -34,10 +33,7 @@ class RestartableTask(Generic[T]):
             return
         self._future = asyncio.Future()
         self._started.set()
-        if sys.version_info >= (3, 11):
-            self._task = asyncio.create_task(self._run(), context=context)
-        else:
-            self._task = asyncio.create_task(self._run())
+        self._task = asyncio.create_task(self._run(), context=context)
 
     def cancel(self) -> None:
         """Cancel the current task if started."""

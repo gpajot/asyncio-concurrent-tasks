@@ -1,8 +1,8 @@
 import asyncio
 from collections.abc import Awaitable, Callable
+from typing import Never
 
 import pytest
-from typing_extensions import Never  # 3.11
 
 
 @pytest.fixture(scope="session")

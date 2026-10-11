@@ -1,12 +1,9 @@
 import asyncio
-import sys
 from collections.abc import Awaitable
 from contextvars import Context
 from dataclasses import dataclass
 from functools import partial
-from typing import Generic, TypeVar
-
-from typing_extensions import Self  # 3.11
+from typing import Generic, Self, TypeVar
 
 T = TypeVar("T")
 
@@ -90,10 +87,7 @@ class TaskPool:
             # The task has been cancelled while waiting in the buffer.
             return
         coro = asyncio.wait_for(task.awaitable, timeout=self.timeout)
-        if sys.version_info >= (3, 11):
-            _task = asyncio.create_task(coro, context=task.context)
-        else:
-            _task = asyncio.create_task(coro)
+        _task = asyncio.create_task(coro, context=task.context)
 
         self._tasks.add(_task)
         _task.add_done_callback(

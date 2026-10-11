@@ -1,13 +1,10 @@
 import asyncio
 import contextlib
 import functools
-import sys
 import time
 from collections.abc import Callable, Coroutine
 from contextvars import Context
-from typing import Any, Generic, TypeVar, cast
-
-from typing_extensions import ParamSpec  # 3.10
+from typing import Any, Generic, ParamSpec, TypeVar, cast
 
 T = TypeVar("T")
 P = ParamSpec("P")
@@ -146,10 +143,7 @@ class AsyncDebouncer(contextlib.AbstractAsyncContextManager, Generic[P]):
                 await self._call()
                 return False
         if not self._task:
-            if sys.version_info >= (3, 11):
-                self._task = asyncio.create_task(self._wait_and_call(), context=context)
-            else:
-                self._task = asyncio.create_task(self._wait_and_call())
+            self._task = asyncio.create_task(self._wait_and_call(), context=context)
         return True
 
     async def _wait_and_call(self) -> None:
