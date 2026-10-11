@@ -1,11 +1,8 @@
 import asyncio
-import sys
 from collections.abc import Callable, Coroutine, Generator
 from contextlib import AbstractContextManager
 from contextvars import Context
-from typing import Any, Generic, TypeVar
-
-from typing_extensions import ParamSpec, Self  # 3.10, 3.11
+from typing import Any, Generic, ParamSpec, Self, TypeVar
 
 T = TypeVar("T")
 P = ParamSpec("P")
@@ -41,10 +38,7 @@ class BackgroundTask(AbstractContextManager, Generic[T]):
         if self._task:
             self._task.cancel()
         coro = self._func(*self._args, **self._kwargs)
-        if sys.version_info >= (3, 11):
-            self._task = asyncio.create_task(coro, context=context)
-        else:
-            self._task = asyncio.create_task(coro)
+        self._task = asyncio.create_task(coro, context=context)
         self._task.add_done_callback(self._done_callback)
         return self._task
 

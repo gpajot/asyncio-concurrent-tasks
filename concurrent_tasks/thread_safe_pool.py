@@ -4,9 +4,7 @@ from collections.abc import Awaitable
 from concurrent import futures
 from dataclasses import dataclass
 from functools import partial
-from typing import Generic, TypeVar
-
-from typing_extensions import Self  # 3.11
+from typing import Generic, Self, TypeVar
 
 T = TypeVar("T")
 

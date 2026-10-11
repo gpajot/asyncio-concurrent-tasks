@@ -1,11 +1,7 @@
 from collections.abc import Awaitable
 from concurrent import futures
 from contextlib import AbstractAsyncContextManager, AbstractContextManager
-from typing import (
-    TypeVar,
-)
-
-from typing_extensions import Self  # 3.11
+from typing import Self, TypeVar
 
 from concurrent_tasks.threaded_pool.base import BaseThreadedTaskPool
 

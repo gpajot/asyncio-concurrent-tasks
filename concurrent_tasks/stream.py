@@ -83,7 +83,7 @@ class RobustStream(asyncio.Protocol):
             # Wait until `connection_lost` was called.
             try:
                 await asyncio.wait_for(self._closed.wait(), timeout=self._timeout)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.error(
                     "%s: timeout waiting for transport to close",
                     self._name,

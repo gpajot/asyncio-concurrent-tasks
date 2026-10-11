@@ -1,20 +1,10 @@
 import asyncio
 import functools
 import math
-import sys
-from datetime import datetime, timedelta
-
-if sys.version_info < (3, 11):
-    from datetime import timezone
-
-    UTC = timezone.utc
-else:
-    from datetime import UTC
 from collections.abc import Callable, Coroutine
+from datetime import UTC, datetime, timedelta
 from time import monotonic
-from typing import Generic
-
-from typing_extensions import ParamSpec  # 3.10
+from typing import Generic, ParamSpec
 
 from concurrent_tasks.background import BackgroundTask
 
