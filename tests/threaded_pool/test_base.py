@@ -1,6 +1,6 @@
 import asyncio
 import time
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncGenerator, Generator
 from contextlib import asynccontextmanager, contextmanager
 
 import pytest
@@ -9,7 +9,7 @@ from concurrent_tasks.threaded_pool.base import BaseThreadedTaskPool
 
 
 @contextmanager
-def pool_cm(pool: BaseThreadedTaskPool) -> Iterator[BaseThreadedTaskPool]:
+def pool_cm(pool: BaseThreadedTaskPool) -> Generator[BaseThreadedTaskPool]:
     pool.start()
     try:
         pool.post_start().result()
@@ -57,7 +57,7 @@ class TestBaseThreadedTaskPool:
         exit_sentinel = mocker.Mock()
 
         @contextmanager
-        def cm() -> Iterator[None]:
+        def cm() -> Generator[None]:
             enter_sentinel()
             try:
                 yield None
@@ -78,7 +78,7 @@ class TestBaseThreadedTaskPool:
         exit_sentinel = mocker.AsyncMock()
 
         @asynccontextmanager
-        async def cm() -> AsyncIterator[None]:
+        async def cm() -> AsyncGenerator[None]:
             await enter_sentinel()
             try:
                 yield None
