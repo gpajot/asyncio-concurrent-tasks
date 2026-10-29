@@ -15,7 +15,7 @@ license-files = ["LICENSE"]
 [dependency-groups]
 dev = [
     "pytest==9.1.1",
-    "pytest-asyncio==1.4.0",
+    "pytest-asyncio==1.4.1",
     "pytest-mock==3.17.0",
     "ruff==0.17.2",
     "pre-commit==4.7.0",
