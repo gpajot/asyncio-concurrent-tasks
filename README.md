@@ -1,8 +1,6 @@
 # asyncio-concurrent-tasks
 
-[![tests](https://github.com/gpajot/asyncio-concurrent-tasks/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/gpajot/asyncio-concurrent-tasks/actions/workflows/test.yml?query=branch%3Amain+event%3Apush)
-[![PyPi](https://img.shields.io/pypi/v/concurrent_tasks?label=stable)](https://pypi.org/project/concurrent_tasks/)
-[![python](https://img.shields.io/pypi/pyversions/concurrent_tasks)](https://pypi.org/project/concurrent_tasks/)
+[![PyPI Version](https://img.shields.io/pypi/v/concurrent-tasks)](https://pypi.org/project/concurrent-tasks/)
 
 Tooling to run asyncio tasks.
 - [Background task](#background-task)
