@@ -27,7 +27,7 @@ class RobustStreamReader(asyncio.StreamReader):
             await self._connected_waiter()
             assert self._transport
         else:
-            await super()._wait_for_data(func_name)  # ty: ignore[unresolved-attribute]
+            await super()._wait_for_data(func_name)  # ty: ignore[missing-attribute]
 
     async def readuntil(self, separator=b"\n"):
         while True:
